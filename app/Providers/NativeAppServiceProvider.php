@@ -2,26 +2,41 @@
 
 namespace App\Providers;
 
-use Native\Desktop\Facades\Window;
 use Native\Desktop\Contracts\ProvidesPhpIni;
+use Native\Desktop\Facades\Menu;
+use Native\Desktop\Facades\Window;
 
 class NativeAppServiceProvider implements ProvidesPhpIni
 {
-    /**
-     * Executed once the native application has been booted.
-     * Use this method to open windows, register global shortcuts, etc.
-     */
     public function boot(): void
     {
-        Window::open();
+        Window::open()
+            ->width(1280)
+            ->height(800)
+            ->minWidth(900)
+            ->minHeight(600)
+            ->title('Jira Worklog Tracker')
+            ->url(route('home'))
+            ->rememberState()
+            ->titleBarHiddenInset();
+
+        Menu::create(
+            Menu::app(),
+            Menu::make(
+                Menu::route('worklogs.create', 'New Worklog', 'CmdOrCtrl+N'),
+                Menu::separator(),
+                Menu::route('worklogs.index', 'View Worklogs', null),
+                Menu::route('issues.index', 'My Issues', null),
+                Menu::separator(),
+                Menu::label('Sync with Jira', 'CmdOrCtrl+R')->event('jira.sync'),
+            )->label('Worklog'),
+            Menu::view(),
+            Menu::window(),
+        );
     }
 
-    /**
-     * Return an array of php.ini directives to be set.
-     */
     public function phpIni(): array
     {
-        return [
-        ];
+        return [];
     }
 }

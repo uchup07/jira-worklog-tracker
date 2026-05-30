@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\JiraIssue;
+use Illuminate\Http\Request;
+use Native\Desktop\Facades\Settings;
+
+class IssueController extends Controller
+{
+    public function index(Request $request)
+    {
+        $projectKey = Settings::get('selected_project_key', '');
+        $accountId = Settings::get('jira_account_id', '');
+
+        $query = JiraIssue::forProject($projectKey)
+            ->assignedTo($accountId)
+            ->orderByDesc('updated_at');
+
+        if ($request->input('status') === 'open') {
+            $query->open();
+        }
+
+        $issues = $query->get();
+
+        return view('issues.index', compact('issues'));
+    }
+}

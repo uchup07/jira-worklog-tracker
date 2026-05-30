@@ -1,7 +1,7 @@
 <?php
 
-test('the application returns a successful response', function () {
+test('the home route redirects to setup when jira is not configured', function () {
     $response = $this->get('/');
 
-    $response->assertStatus(200);
+    $response->assertRedirect();
 });

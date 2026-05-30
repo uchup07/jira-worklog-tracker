@@ -1,82 +1,113 @@
 @extends('layouts.app')
+@section('title', 'Worklogs')
 
 @section('content')
 
-<div class="flex items-center justify-between mb-5">
-    <h1 class="text-lg font-semibold text-white">Worklogs</h1>
-    <a href="{{ route('worklogs.create') }}"
-       class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors">
-        + New Worklog
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+    <div>
+        <h1 class="display" style="font-size:22px; font-weight:800; font-style:italic; color:var(--text); line-height:1; letter-spacing:-0.02em;">Worklogs</h1>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:3px;">All logged time for the project</p>
+    </div>
+    <a href="{{ route('worklogs.create') }}" class="btn btn-primary">
+        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" d="M12 5v14M5 12h14"/>
+        </svg>
+        Log Time
     </a>
 </div>
 
-<form method="GET" action="{{ route('worklogs.index') }}" class="flex items-center gap-3 mb-5">
-    <select name="author" class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+{{-- Filter bar --}}
+<form method="GET" action="{{ route('worklogs.index') }}"
+      style="display:flex; align-items:center; gap:8px; margin-bottom:14px; padding:10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:10px;">
+
+    <select name="author" style="background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-size:12.5px; font-family:'IBM Plex Sans',sans-serif; color:var(--text); outline:none; cursor:pointer;">
         <option value="">All authors</option>
         @foreach($authors as $author)
-            <option value="{{ $author->author_account_id }}"
-                    {{ request('author') === $author->author_account_id ? 'selected' : '' }}>
+            <option value="{{ $author->author_account_id }}" {{ request('author') === $author->author_account_id ? 'selected' : '' }}>
                 {{ $author->author_display_name }}
             </option>
         @endforeach
     </select>
 
-    <input type="date" name="from" value="{{ request('from') }}"
-           class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-    <span class="text-gray-500 text-sm">to</span>
-    <input type="date" name="to" value="{{ request('to') }}"
-           class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <div style="display:flex; align-items:center; gap:6px;">
+        <input type="date" name="from" value="{{ request('from') }}"
+               style="background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-size:12.5px; font-family:'IBM Plex Sans',sans-serif; color:var(--text); outline:none; color-scheme:dark;">
+        <span style="font-size:11px; color:var(--text-muted);">—</span>
+        <input type="date" name="to" value="{{ request('to') }}"
+               style="background:var(--surface-2); border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-size:12.5px; font-family:'IBM Plex Sans',sans-serif; color:var(--text); outline:none; color-scheme:dark;">
+    </div>
 
-    <button type="submit" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg border border-gray-700 transition-colors">
-        Filter
-    </button>
+    <button type="submit" class="btn btn-ghost btn-sm" style="font-size:12px;">Filter</button>
 
-    @if(request()->hasAny(['author', 'from', 'to', 'mine']))
-        <a href="{{ route('worklogs.index') }}" class="text-xs text-gray-500 hover:text-gray-300">Clear</a>
+    @if(request()->hasAny(['author','from','to','mine']))
+        <a href="{{ route('worklogs.index') }}" style="font-size:11.5px; color:var(--text-muted); text-decoration:none; padding:4px 8px; border-radius:5px; transition:color 120ms;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+            Clear ×
+        </a>
     @endif
 
-    <label class="flex items-center gap-2 ml-auto text-sm text-gray-400 cursor-pointer">
+    <label style="display:flex; align-items:center; gap:6px; margin-left:auto; font-size:12.5px; color:var(--text-muted); cursor:pointer;">
         <input type="checkbox" name="mine" value="1" {{ request()->boolean('mine') ? 'checked' : '' }}
-               class="rounded bg-gray-700 border-gray-600 text-blue-500">
+               style="accent-color:var(--accent); width:13px; height:13px;">
         Mine only
     </label>
 </form>
 
+{{-- Table --}}
 @if($worklogs->isEmpty())
-    <div class="bg-gray-900 rounded-xl border border-gray-800 p-8 text-center">
-        <p class="text-gray-500">No worklogs found. Try adjusting your filters or sync first.</p>
+    <div class="card" style="padding:40px; text-align:center;">
+        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.2" style="color:var(--text-subtle); margin:0 auto 10px;">
+            <circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/>
+        </svg>
+        <p style="font-size:13px; color:var(--text-muted);">No worklogs found. Try adjusting filters or sync first.</p>
     </div>
 @else
-    <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-        <table class="w-full text-sm">
+    <div class="card" style="overflow:hidden;">
+        <table class="data-table">
             <thead>
-                <tr class="border-b border-gray-800">
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Issue</th>
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Author</th>
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Date</th>
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Time</th>
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Comment</th>
+                <tr>
+                    <th style="padding-left:16px;">Issue</th>
+                    <th>Author</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Comment</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-800">
+            <tbody>
                 @foreach($worklogs as $wl)
-                    <tr class="hover:bg-gray-800/50">
-                        <td class="px-4 py-3">
-                            <span class="font-mono text-xs font-semibold text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded">{{ $wl->issue_key }}</span>
+                    @php
+                        $h = floor($wl->time_spent_seconds/3600);
+                        $m = floor(($wl->time_spent_seconds%3600)/60);
+                        $t = $h > 0 ? "{$h}h".($m > 0 ? " {$m}m" : '') : "{$m}m";
+                        $isMe = $wl->author_account_id === $accountId;
+                    @endphp
+                    <tr>
+                        <td><span class="badge-key">{{ $wl->issue_key }}</span></td>
+                        <td style="font-size:13px; color:{{ $isMe ? 'var(--text)' : 'var(--text-muted)' }}; font-weight:{{ $isMe ? '500' : '400' }};">
+                            {{ $wl->author_display_name }}
+                            @if($isMe)<span style="font-size:10px; color:var(--accent); margin-left:4px; opacity:0.8;">you</span>@endif
                         </td>
-                        <td class="px-4 py-3 text-gray-300">{{ $wl->author_display_name }}</td>
-                        <td class="px-4 py-3 text-gray-400">{{ $wl->started_at?->format('M j, Y') }}</td>
-                        <td class="px-4 py-3 font-semibold text-white">{{ gmdate('G\h i\m', $wl->time_spent_seconds) }}</td>
-                        <td class="px-4 py-3 text-gray-400 max-w-xs truncate">{{ $wl->comment ?: '—' }}</td>
+                        <td>
+                            <span class="mono" style="font-size:12px; color:var(--text-muted);">
+                                {{ $wl->started_at?->format('M j, Y') }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="display" style="font-size:15px; font-weight:700; font-style:italic; color:var(--text);">{{ $t }}</span>
+                        </td>
+                        <td style="font-size:12.5px; color:var(--text-muted); max-width:220px;">
+                            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $wl->comment ?: '—' }}</div>
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-    <div class="mt-4">
-        {{ $worklogs->appends(request()->query())->links() }}
-    </div>
+    @if($worklogs->hasPages())
+        <div style="margin-top:14px; display:flex; justify-content:center;">
+            {{ $worklogs->appends(request()->query())->links() }}
+        </div>
+    @endif
 @endif
 
 @endsection

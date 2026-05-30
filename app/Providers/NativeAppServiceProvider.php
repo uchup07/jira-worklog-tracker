@@ -30,6 +30,7 @@ class NativeAppServiceProvider implements ProvidesPhpIni
                 Menu::separator(),
                 Menu::label('Sync with Jira', 'CmdOrCtrl+R')->event('jira.sync'),
             )->label('Worklog'),
+            Menu::edit(),
             Menu::view(),
             Menu::window(),
         );

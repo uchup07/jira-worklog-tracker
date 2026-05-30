@@ -1,61 +1,65 @@
 @extends('layouts.app')
+@section('title', 'My Issues')
 
 @section('content')
 
-<div class="flex items-center justify-between mb-5">
-    <h1 class="text-lg font-semibold text-white">My Issues</h1>
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+    <div>
+        <h1 class="display" style="font-size:22px; font-weight:800; font-style:italic; color:var(--text); line-height:1; letter-spacing:-0.02em;">My Issues</h1>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:3px;">Issues assigned to you in the project</p>
+    </div>
 
-    <div class="flex items-center gap-2">
+    <div style="display:flex; gap:6px;">
         <a href="{{ route('issues.index') }}"
-           class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
-                  {{ !request('status') ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white' }}">
+           style="font-size:12px; font-weight:500; padding:6px 14px; border-radius:6px; text-decoration:none; transition:all 120ms; border:1px solid;
+                  {{ !request('status') ? 'color:var(--accent); background:var(--accent-dim); border-color:rgba(237,217,76,0.3);' : 'color:var(--text-muted); background:transparent; border-color:var(--border);' }}">
             All
         </a>
         <a href="{{ route('issues.index', ['status' => 'open']) }}"
-           class="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
-                  {{ request('status') === 'open' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white' }}">
+           style="font-size:12px; font-weight:500; padding:6px 14px; border-radius:6px; text-decoration:none; transition:all 120ms; border:1px solid;
+                  {{ request('status') === 'open' ? 'color:var(--accent); background:var(--accent-dim); border-color:rgba(237,217,76,0.3);' : 'color:var(--text-muted); background:transparent; border-color:var(--border);' }}">
             Open
         </a>
     </div>
 </div>
 
 @if($issues->isEmpty())
-    <div class="bg-gray-900 rounded-xl border border-gray-800 p-8 text-center">
-        <p class="text-gray-500">No issues assigned to you. Try syncing first.</p>
+    <div class="card" style="padding:48px; text-align:center;">
+        <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.2" style="color:var(--text-subtle); margin:0 auto 12px; display:block;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        <p style="font-size:13.5px; color:var(--text-muted);">No issues assigned to you.</p>
+        <p style="font-size:12px; color:var(--text-subtle); margin-top:4px;">Try syncing to pull the latest data from Jira.</p>
     </div>
 @else
-    <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-        <table class="w-full text-sm">
+    <div class="card" style="overflow:hidden;">
+        <table class="data-table">
             <thead>
-                <tr class="border-b border-gray-800">
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Key</th>
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Summary</th>
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Type</th>
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Priority</th>
-                    <th class="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
-                    <th class="px-4 py-3"></th>
+                <tr>
+                    <th>Key</th>
+                    <th>Summary</th>
+                    <th style="width:80px;">Type</th>
+                    <th style="width:80px;">Priority</th>
+                    <th style="width:130px;">Status</th>
+                    <th style="width:70px;"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-800">
+            <tbody>
                 @foreach($issues as $issue)
-                    <tr class="hover:bg-gray-800/50">
-                        <td class="px-4 py-3">
-                            <span class="font-mono text-xs font-semibold text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded">
-                                {{ $issue->issue_key }}
-                            </span>
+                    <tr>
+                        <td style="width:90px;"><span class="badge-key">{{ $issue->issue_key }}</span></td>
+                        <td style="color:var(--text); font-size:13px; max-width:0;">
+                            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $issue->summary }}</div>
                         </td>
-                        <td class="px-4 py-3 text-gray-200 max-w-sm">
-                            <span class="truncate block">{{ $issue->summary }}</span>
-                        </td>
-                        <td class="px-4 py-3 text-gray-400 text-xs">{{ $issue->issue_type }}</td>
-                        <td class="px-4 py-3 text-gray-400 text-xs">{{ $issue->priority ?? '—' }}</td>
-                        <td class="px-4 py-3">
-                            <span class="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded">{{ $issue->status }}</span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
+                        <td style="font-size:12px; color:var(--text-muted);">{{ $issue->issue_type }}</td>
+                        <td style="font-size:12px; color:var(--text-muted);">{{ $issue->priority ?? '—' }}</td>
+                        <td><span class="badge-status">{{ $issue->status }}</span></td>
+                        <td style="text-align:right;">
                             <a href="{{ route('worklogs.create', ['issue' => $issue->issue_key]) }}"
-                               class="text-xs text-blue-400 hover:text-white hover:bg-blue-600 px-2 py-1 rounded border border-blue-700 hover:border-blue-600 transition-colors">
-                                Log Time
+                               style="font-size:11px; font-weight:500; color:var(--accent); text-decoration:none; padding:4px 9px; border:1px solid rgba(237,217,76,0.25); border-radius:5px; white-space:nowrap; transition:all 120ms; display:inline-block;"
+                               onmouseover="this.style.background='var(--accent-dim)'; this.style.borderColor='rgba(237,217,76,0.4)'"
+                               onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(237,217,76,0.25)'">
+                                Log
                             </a>
                         </td>
                     </tr>
@@ -63,6 +67,9 @@
             </tbody>
         </table>
     </div>
+    <p style="font-size:11.5px; color:var(--text-muted); margin-top:10px; text-align:right;">
+        {{ $issues->count() }} issue{{ $issues->count() !== 1 ? 's' : '' }}
+    </p>
 @endif
 
 @endsection

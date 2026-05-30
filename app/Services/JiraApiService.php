@@ -95,14 +95,29 @@ class JiraApiService
 
     public function searchIssues(string $jql, int $maxResults = 200, int $startAt = 0): array
     {
-        $data = $this->handleResponse(
-            $this->baseRequest()->post('/issue/search', [
+        $fields = ['summary', 'status', 'priority', 'issuetype', 'assignee', 'project'];
+
+        $payload = [
+            'jql' => $jql,
+            'maxResults' => $maxResults,
+            'startAt' => $startAt,
+            'fields' => $fields,
+        ];
+
+        // /search is still documented and accepts the classic request body shape.
+        // Enhanced search payloads have been inconsistent across tenants, so use
+        // /search first and fall back to enhanced GET if a tenant has removed it.
+        $response = $this->baseRequest()->post('/search', $payload);
+
+        if (in_array($response->status(), [404, 405, 410], true)) {
+            $response = $this->baseRequest()->get('/search/jql', [
                 'jql' => $jql,
                 'maxResults' => $maxResults,
-                'startAt' => $startAt,
-                'fields' => ['summary', 'status', 'priority', 'issuetype', 'assignee', 'project'],
-            ])
-        );
+                'fields' => implode(',', $fields),
+            ]);
+        }
+
+        $data = $this->handleResponse($response);
 
         return $data['issues'] ?? [];
     }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Native\Desktop\Facades\Settings;
+use TallStackUi\Facades\TallStackUi;
 use Throwable;
 
 class AppServiceProvider extends ServiceProvider
@@ -34,6 +35,10 @@ class AppServiceProvider extends ServiceProvider
             $lastSynced = Settings::get('last_synced_at', null);
             $view->with('lastSynced', $lastSynced ? Carbon::parse($lastSynced)->diffForHumans() : null);
         });
+
+        TallStackUi::customize()
+            ->sideBar()
+            ->block('desktop.wrapper.first.base', 'fixed left-0 bottom-0 z-50 flex flex-col top-[38px]');
     }
 
     protected function resolveAppTheme(): string

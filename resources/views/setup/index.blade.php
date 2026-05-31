@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connect to Jira — Worklog Tracker</title>
+    <tallstackui:script />
+    @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body style="background:var(--bg); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; -webkit-app-region:drag;">
 
@@ -25,13 +26,10 @@
             </p>
         </div>
 
-        <div class="card" style="padding:24px;">
+        <x-card style="padding:22px;">
 
             @if(session('error'))
-                <div style="margin-bottom:16px; padding:9px 12px; background:oklch(0.65 0.22 25 / 0.08); border:1px solid oklch(0.65 0.22 25 / 0.2); border-radius:var(--radius); font-size:12.5px; color:var(--red); display:flex; gap:8px; align-items:flex-start;">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" style="flex-shrink:0; margin-top:1px;"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v4M12 16h.01"/></svg>
-                    {{ session('error') }}
-                </div>
+                <x-alert text="{{ session('error') }}" color="red" class="mb-4" />
             @endif
 
             <form method="POST" action="{{ route('setup.store') }}"
@@ -40,64 +38,52 @@
 
                 <div style="display:flex; flex-direction:column; gap:14px;">
 
-                    <div>
-                        <label class="label" for="domain">Jira Domain</label>
-                        <input type="text" id="domain" name="domain"
-                               value="{{ old('domain', $prefill['domain'] ?? '') }}"
-                               placeholder="mycompany.atlassian.net"
-                               class="input {{ $errors->has('domain') ? 'error' : '' }}">
-                        @error('domain')
-                            <p style="font-size:11.5px; color:var(--red); margin-top:4px;">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <x-input label="Jira Domain"
+                             name="domain"
+                             placeholder="mycompany.atlassian.net"
+                             :value="old('domain', $prefill['domain'] ?? '')"
+                             :error="$errors->first('domain')" />
+
+                    <x-input label="Email"
+                             name="email"
+                             type="email"
+                             placeholder="you@example.com"
+                             :value="old('email', $prefill['email'] ?? '')"
+                             :error="$errors->first('email')" />
 
                     <div>
-                        <label class="label" for="email">Email</label>
-                        <input type="email" id="email" name="email"
-                               value="{{ old('email', $prefill['email'] ?? '') }}"
-                               placeholder="you@example.com"
-                               class="input {{ $errors->has('email') ? 'error' : '' }}">
-                        @error('email')
-                            <p style="font-size:11.5px; color:var(--red); margin-top:4px;">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:5px;">
-                            <label class="label" for="api_token" style="margin-bottom:0;">API Token</label>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                            <span style="font-size:12px; font-weight:500; color:var(--text-muted);">API Token</span>
                             <a href="https://id.atlassian.com/manage-profile/security/api-tokens"
                                target="_blank"
-                               style="font-size:11.5px; color:var(--accent); text-decoration:none; opacity:0.85; transition:opacity 100ms;"
+                               style="font-size:11.5px; color:var(--accent); text-decoration:none; opacity:0.85;"
                                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.85'">
                                 Get token →
                             </a>
                         </div>
-                        <input type="password" id="api_token" name="api_token"
-                               placeholder="••••••••••••••••••••"
-                               class="input mono {{ $errors->has('api_token') ? 'error' : '' }}">
-                        @error('api_token')
-                            <p style="font-size:11.5px; color:var(--red); margin-top:4px;">{{ $message }}</p>
-                        @enderror
+                        <x-password name="api_token"
+                                    placeholder="Your Atlassian API token"
+                                    :error="$errors->first('api_token')" />
                     </div>
 
                 </div>
 
-                <button type="submit" class="btn btn-primary"
-                        :disabled="submitting" :class="{ 'opacity-50': submitting }"
-                        style="width:100%; justify-content:center; margin-top:20px; padding:8px 12px;">
-                    <svg width="13" height="13" fill="none" stroke="currentColor"
-                         viewBox="0 0 24 24" stroke-width="2.2" x-show="!submitting">
-                        <path stroke-linecap="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                    <span x-text="submitting ? 'Connecting…' : 'Connect to Jira'"></span>
-                </button>
+                <div style="margin-top:20px;">
+                    <x-button type="submit"
+                              color="primary"
+                              full
+                              x-bind:loading="submitting">
+                        Connect to Jira
+                    </x-button>
+                </div>
             </form>
-        </div>
+        </x-card>
 
         <p style="text-align:center; font-size:11px; color:var(--text-subtle); margin-top:14px; line-height:1.6;">
             Credentials are stored locally on this device only.
         </p>
     </div>
 
+    @livewireScripts
 </body>
 </html>

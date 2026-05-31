@@ -18,12 +18,22 @@
             <div style="display:flex; flex-direction:column; gap:16px;">
 
                 {{-- Issue select --}}
-                <x-select label="Issue"
-                          name="issue_key"
-                          placeholder="Select an issue…"
-                          :error="$errors->first('issue_key')"
-                          :options="$issues->mapWithKeys(fn($i) => [$i->issue_key => $i->issue_key.' — '.$i->summary])->toArray()"
-                          :selected="old('issue_key', $selectedIssue)" />
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:5px;">Issue</label>
+                    <select name="issue_key"
+                            style="width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:7px 10px; font-size:13px; font-family:'Geist',sans-serif; color:var(--text); outline:none; color-scheme:dark;">
+                        <option value="">Select an issue…</option>
+                        @foreach($issues as $issue)
+                            <option value="{{ $issue->issue_key }}"
+                                    @selected(old('issue_key', $selectedIssue) === $issue->issue_key)>
+                                {{ $issue->issue_key }} — {{ $issue->summary }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('issue_key')
+                        <p style="font-size:11.5px; color:var(--red); margin-top:4px;">{{ $message }}</p>
+                    @enderror
+                </div>
 
                 {{-- Time + Date --}}
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
@@ -56,8 +66,7 @@
                               x-bind:loading="submitting">
                         Log Time
                     </x-button>
-                    <x-button tag="a"
-                              href="{{ route('worklogs.index') }}"
+                    <x-button href="{{ route('worklogs.index') }}"
                               color="secondary"
                               light>
                         Cancel

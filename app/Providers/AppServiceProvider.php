@@ -39,7 +39,8 @@ class AppServiceProvider extends ServiceProvider
         // Offset sidebar below NativePHP 38px drag strip; fix nav items height constraint
         TallStackUi::customize()
             ->sideBar()
-            ->block('desktop.wrapper.first.base', 'fixed left-0 bottom-0 z-50 flex flex-col top-[38px]')
+            ->block('desktop.wrapper.first.base', 'fixed left-0 top-[38px] z-50')
+            ->block('desktop.wrapper.second', 'dark:bg-dark-700 dark:border-dark-600 flex h-[calc(100vh-38px)] flex-col border-r border-gray-200 bg-white pb-4 transition-[width] duration-300')
             ->block('desktop.wrapper.third', 'flex flex-col')
             ->block('desktop.wrapper.fourth', 'flex flex-1 flex-col');
 

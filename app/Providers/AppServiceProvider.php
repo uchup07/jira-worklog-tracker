@@ -36,9 +36,18 @@ class AppServiceProvider extends ServiceProvider
             $view->with('lastSynced', $lastSynced ? Carbon::parse($lastSynced)->diffForHumans() : null);
         });
 
+        // Offset sidebar below NativePHP 38px drag strip; fix nav items height constraint
         TallStackUi::customize()
             ->sideBar()
-            ->block('desktop.wrapper.first.base', 'fixed left-0 bottom-0 z-50 flex flex-col top-[38px]');
+            ->block('desktop.wrapper.first.base', 'fixed left-0 bottom-0 z-50 flex flex-col top-[38px]')
+            ->block('desktop.wrapper.third', 'flex flex-col')
+            ->block('desktop.wrapper.fourth', 'flex flex-1 flex-col');
+
+        // Make content area fill viewport; reduce excessive padding; enable content scroll
+        TallStackUi::customize()
+            ->layout()
+            ->block('wrapper.first', 'min-h-screen')
+            ->block('main', 'overflow-y-auto px-5 py-4 max-w-full');
     }
 
     protected function resolveAppTheme(): string

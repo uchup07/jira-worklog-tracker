@@ -13,7 +13,7 @@
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body x-bind:class="{ dark: darkTheme }">
+<body class="overflow-hidden" x-bind:class="{ dark: darkTheme }">
 
 <x-layout>
 

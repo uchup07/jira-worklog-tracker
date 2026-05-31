@@ -3,7 +3,7 @@
 use App\Models\JiraWorklog;
 use Livewire\Component;
 use Livewire\WithPagination;
-use NativePHP\Desktop\Facades\Settings;
+use Native\Desktop\Facades\Settings;
 
 new class extends Component
 {

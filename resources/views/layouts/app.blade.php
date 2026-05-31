@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en"
-      data-theme="{{ $appTheme }}"
+      class="{{ $appTheme === 'dark' ? 'dark' : '' }}"
       x-data="tallstackui_darkTheme({ default: @js($appTheme), name: 'app-theme' })"
-      x-bind:data-theme="darkTheme ? 'dark' : 'light'"
+      x-bind:class="{ dark: darkTheme }"
       x-effect="window.appTheme && window.appTheme.sync(darkTheme ? 'dark' : 'light')">
 <head>
     <meta charset="UTF-8">

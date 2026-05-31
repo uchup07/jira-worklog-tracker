@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\JiraBackgroundSyncService;
 use App\Services\JiraApiService;
 use Illuminate\Http\Request;
 use Native\Desktop\Facades\Settings;
@@ -47,13 +48,28 @@ class SetupController extends Controller
         return view('setup.project', compact('projects'));
     }
 
-    public function storeProject(Request $request)
+    public function storeProject(Request $request, JiraBackgroundSyncService $backgroundSyncService)
     {
         $request->validate(['project_key' => 'required|string']);
 
-        Settings::set('selected_project_key', $request->project_key);
+        return $this->setProjectAndRedirect($request->project_key, $backgroundSyncService);
+    }
 
-        return redirect()->route('dashboard')->with('run_initial_sync', true);
+    protected function setProjectAndRedirect(string $projectKey, JiraBackgroundSyncService $backgroundSyncService)
+    {
+        Settings::set('selected_project_key', $projectKey);
+
+        $message = "Project changed to {$projectKey}.";
+
+        try {
+            $backgroundSyncService->dispatch($projectKey);
+            $message .= ' Background sync started.';
+        } catch (\RuntimeException $e) {
+            report($e);
+            $message .= ' Background sync was not started.';
+        }
+
+        return redirect()->route('dashboard')->with('success', $message);
     }
 
     public function settings()
@@ -68,7 +84,7 @@ class SetupController extends Controller
 
     public function disconnect()
     {
-        foreach (['jira_domain', 'jira_email', 'jira_api_token', 'jira_account_id', 'jira_display_name', 'selected_project_key', 'last_synced_at'] as $key) {
+        foreach (['jira_domain', 'jira_email', 'jira_api_token', 'jira_account_id', 'jira_display_name', 'selected_project_key', 'last_synced_at', 'sync_in_progress', 'sync_started_at'] as $key) {
             Settings::forget($key);
         }
 

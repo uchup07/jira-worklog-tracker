@@ -54,4 +54,102 @@ class JiraApiServiceTest extends TestCase
                 && $request->method() === 'GET';
         });
     }
+
+    public function test_search_issues_paginates_classic_search_results(): void
+    {
+        Http::fake([
+            'https://example.atlassian.net/rest/api/3/search' => function ($request) {
+                $startAt = $request['startAt'];
+                $maxResults = $request['maxResults'];
+                $remaining = max(0, 150 - $startAt);
+                $count = min($maxResults, $remaining);
+                $issues = [];
+
+                for ($i = 0; $i < $count; $i++) {
+                    $index = $startAt + $i + 1;
+                    $issues[] = ['key' => "PROJ-{$index}", 'fields' => ['summary' => "Issue {$index}"]];
+                }
+
+                return Http::response(['issues' => $issues], 200);
+            },
+        ]);
+
+        $service = new JiraApiService('example.atlassian.net', 'user@example.com', 'token');
+
+        $issues = $service->searchIssues('project = "PROJ"', 150);
+
+        $this->assertCount(150, $issues);
+        Http::assertSentCount(2);
+    }
+
+    public function test_get_worklogs_for_issue_paginates_results(): void
+    {
+        Http::fake([
+            'https://example.atlassian.net/rest/api/3/issue/PROJ-1/worklog*' => function ($request) {
+                parse_str(parse_url($request->url(), PHP_URL_QUERY) ?? '', $query);
+
+                $startAt = (int) ($query['startAt'] ?? 0);
+                $maxResults = (int) ($query['maxResults'] ?? 100);
+                $remaining = max(0, 125 - $startAt);
+                $count = min($maxResults, $remaining);
+                $worklogs = [];
+
+                for ($i = 0; $i < $count; $i++) {
+                    $index = $startAt + $i + 1;
+                    $worklogs[] = [
+                        'id' => (string) $index,
+                        'author' => ['accountId' => 'user-1', 'displayName' => 'User One'],
+                        'timeSpentSeconds' => 60,
+                    ];
+                }
+
+                return Http::response([
+                    'startAt' => $startAt,
+                    'maxResults' => $maxResults,
+                    'total' => 125,
+                    'worklogs' => $worklogs,
+                ], 200);
+            },
+        ]);
+
+        $service = new JiraApiService('example.atlassian.net', 'user@example.com', 'token');
+
+        $worklogs = $service->getWorklogsForIssue('PROJ-1');
+
+        $this->assertCount(125, $worklogs);
+        Http::assertSentCount(2);
+    }
+
+    public function test_get_assignable_users_for_project_paginates_results(): void
+    {
+        Http::fake([
+            'https://example.atlassian.net/rest/api/3/user/assignable/search*' => function ($request) {
+                parse_str(parse_url($request->url(), PHP_URL_QUERY) ?? '', $query);
+
+                $startAt = (int) ($query['startAt'] ?? 0);
+                $maxResults = (int) ($query['maxResults'] ?? 100);
+                $remaining = max(0, 125 - $startAt);
+                $count = min($maxResults, $remaining);
+                $users = [];
+
+                for ($i = 0; $i < $count; $i++) {
+                    $index = $startAt + $i + 1;
+                    $users[] = [
+                        'accountId' => "user-{$index}",
+                        'displayName' => "User {$index}",
+                        'active' => true,
+                    ];
+                }
+
+                return Http::response($users, 200);
+            },
+        ]);
+
+        $service = new JiraApiService('example.atlassian.net', 'user@example.com', 'token');
+
+        $users = $service->getAssignableUsersForProject('PROJ', 125);
+
+        $this->assertCount(125, $users);
+        Http::assertSentCount(2);
+    }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\JiraSyncService;
+use App\Services\JiraBackgroundSyncService;
 use Illuminate\Http\Request;
 use Native\Desktop\Facades\Settings;
 
 class SyncController extends Controller
 {
-    public function sync(Request $request)
+    public function sync(Request $request, JiraBackgroundSyncService $backgroundSyncService)
     {
         $projectKey = Settings::get('selected_project_key', '');
 
@@ -17,12 +17,12 @@ class SyncController extends Controller
         }
 
         try {
-            $result = JiraSyncService::make()->syncProject($projectKey);
+            $backgroundSyncService->dispatch($projectKey);
 
-            $message = "Synced {$result['issues']} issues and {$result['worklogs']} worklogs.";
+            return redirect()->back()->with('success', 'Background sync started. You will get a desktop notification when it finishes.');
+        } catch (\Throwable $e) {
+            report($e);
 
-            return redirect()->back()->with('success', $message);
-        } catch (\RuntimeException $e) {
             return redirect()->back()->with('error', 'Sync failed: '.$e->getMessage());
         }
     }

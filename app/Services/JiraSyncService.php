@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\JiraIssue;
+use App\Models\JiraProjectUser;
 use App\Models\JiraWorklog;
 use Carbon\Carbon;
 use Native\Desktop\Facades\Settings;
@@ -20,19 +21,26 @@ class JiraSyncService
     {
         $issuesSynced = $this->syncIssues($projectKey);
         $worklogsSynced = $this->syncWorklogs($projectKey);
+        $usersSynced = $this->syncProjectUsers($projectKey);
 
         Settings::set('last_synced_at', now()->toISOString());
 
         return [
             'issues' => $issuesSynced,
             'worklogs' => $worklogsSynced,
+            'users' => $usersSynced,
         ];
     }
 
     private function syncIssues(string $projectKey): int
     {
         $jql = 'project = "'.addslashes($projectKey).'" ORDER BY updated DESC';
-        $issues = $this->api->searchIssues($jql, 200);
+
+        try {
+            $issues = $this->api->searchIssues($jql, 200);
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException("Failed to search Jira issues for project {$projectKey}: {$e->getMessage()}", previous: $e);
+        }
 
         if (empty($issues)) {
             return 0;
@@ -75,7 +83,11 @@ class JiraSyncService
         $rows = [];
 
         foreach ($issueKeys as $issueKey) {
-            $worklogs = $this->api->getWorklogsForIssue($issueKey);
+            try {
+                $worklogs = $this->api->getWorklogsForIssue($issueKey);
+            } catch (\RuntimeException $e) {
+                throw new \RuntimeException("Failed to fetch Jira worklogs for issue {$issueKey}: {$e->getMessage()}", previous: $e);
+            }
 
             foreach ($worklogs as $worklog) {
                 $rows[] = [
@@ -102,6 +114,72 @@ class JiraSyncService
         JiraWorklog::upsert($rows, ['jira_worklog_id'], [
             'author_account_id', 'author_display_name', 'time_spent_seconds',
             'started_at', 'comment', 'synced_at', 'updated_at',
+        ]);
+
+        return count($rows);
+    }
+
+    private function syncProjectUsers(string $projectKey): int
+    {
+        try {
+            $assignableUsers = $this->api->getAssignableUsersForProject($projectKey);
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException("Failed to fetch Jira users for project {$projectKey}: {$e->getMessage()}", previous: $e);
+        }
+
+        $users = collect($assignableUsers)
+            ->map(fn (array $user) => [
+                'project_key' => $projectKey,
+                'account_id' => $user['accountId'] ?? null,
+                'display_name' => $user['displayName'] ?? null,
+                'active' => $user['active'] ?? true,
+                'source' => 'assignable',
+            ])
+            ->filter(fn (array $user) => filled($user['account_id']) && filled($user['display_name']));
+
+        $issueAssignees = JiraIssue::forProject($projectKey)
+            ->whereNotNull('assignee_account_id')
+            ->whereNotNull('assignee_display_name')
+            ->get()
+            ->map(fn (JiraIssue $issue) => [
+                'project_key' => $projectKey,
+                'account_id' => $issue->assignee_account_id,
+                'display_name' => $issue->assignee_display_name,
+                'active' => true,
+                'source' => 'issue-assignee',
+            ]);
+
+        $worklogAuthors = JiraWorklog::forProject($projectKey)
+            ->select('author_account_id', 'author_display_name')
+            ->distinct()
+            ->get()
+            ->map(fn (JiraWorklog $worklog) => [
+                'project_key' => $projectKey,
+                'account_id' => $worklog->author_account_id,
+                'display_name' => $worklog->author_display_name,
+                'active' => true,
+                'source' => 'worklog-author',
+            ]);
+
+        $rows = $users
+            ->concat($issueAssignees)
+            ->concat($worklogAuthors)
+            ->unique(fn (array $user) => $user['project_key'].'|'.$user['account_id'])
+            ->map(fn (array $user) => [
+                ...$user,
+                'synced_at' => now()->toDateTimeString(),
+                'created_at' => now()->toDateTimeString(),
+                'updated_at' => now()->toDateTimeString(),
+            ])
+            ->values()
+            ->all();
+
+        if (empty($rows)) {
+            return 0;
+        }
+
+        JiraProjectUser::upsert($rows, ['project_key', 'account_id'], [
+            'display_name', 'active', 'source', 'synced_at', 'updated_at',
         ]);
 
         return count($rows);

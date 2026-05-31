@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\JiraProjectUser;
 use App\Models\JiraWorklog;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -76,10 +77,8 @@ new class extends Component
 
         return [
             'worklogs' => $query->orderByDesc('started_at')->paginate(30),
-            'authors' => JiraWorklog::query()->forProject($projectKey)
-                ->select('author_account_id', 'author_display_name')
-                ->distinct()
-                ->orderBy('author_display_name')
+            'authors' => JiraProjectUser::query()->forProject($projectKey)
+                ->orderBy('display_name')
                 ->get(),
             'accountId' => $accountId,
         ];
@@ -93,9 +92,9 @@ new class extends Component
 
         <select wire:model.live="author"
                 style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:5px 9px; font-size:12.5px; font-family:'Geist',sans-serif; color:var(--text); outline:none; cursor:pointer;">
-            <option value="">All authors</option>
+            <option value="">All users</option>
             @foreach($authors as $a)
-                <option value="{{ $a->author_account_id }}">{{ $a->author_display_name }}</option>
+                <option value="{{ $a->account_id }}">{{ $a->display_name }}</option>
             @endforeach
         </select>
 

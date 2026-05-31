@@ -9,6 +9,10 @@ use Native\Desktop\Facades\Settings;
 
 class JiraApiService
 {
+    private const SEARCH_PAGE_SIZE = 100;
+    private const WORKLOG_PAGE_SIZE = 100;
+    private const USER_PAGE_SIZE = 100;
+
     public function __construct(
         private string $domain,
         private string $email,
@@ -95,6 +99,86 @@ class JiraApiService
 
     public function searchIssues(string $jql, int $maxResults = 200, int $startAt = 0): array
     {
+        $issues = [];
+        $remaining = $maxResults;
+        $offset = $startAt;
+
+        while ($remaining > 0) {
+            $pageSize = min(self::SEARCH_PAGE_SIZE, $remaining);
+            $data = $this->searchIssuesPage($jql, $pageSize, $offset);
+            $pageIssues = $data['issues'] ?? [];
+
+            $issues = [...$issues, ...$pageIssues];
+
+            if (count($pageIssues) < $pageSize) {
+                break;
+            }
+
+            $offset += count($pageIssues);
+            $remaining -= count($pageIssues);
+        }
+
+        return $issues;
+    }
+
+    public function getWorklogsForIssue(string $issueKey): array
+    {
+        $worklogs = [];
+        $startAt = 0;
+
+        do {
+            $data = $this->handleResponse(
+                $this->baseRequest()->get("/issue/{$issueKey}/worklog", [
+                    'startAt' => $startAt,
+                    'maxResults' => self::WORKLOG_PAGE_SIZE,
+                ])
+            );
+
+            $pageWorklogs = $data['worklogs'] ?? [];
+            $worklogs = [...$worklogs, ...$pageWorklogs];
+            $startAt += count($pageWorklogs);
+            $total = $data['total'] ?? count($worklogs);
+        } while (! empty($pageWorklogs) && $startAt < $total);
+
+        return $worklogs;
+    }
+
+    public function getAssignableUsersForProject(string $projectKey, int $maxResults = 1000): array
+    {
+        $users = [];
+        $remaining = min($maxResults, 1000);
+        $startAt = 0;
+
+        while ($remaining > 0) {
+            $pageSize = min(self::USER_PAGE_SIZE, $remaining);
+
+            $pageUsers = $this->handleResponse(
+                $this->baseRequest()->get('/user/assignable/search', [
+                    'project' => $projectKey,
+                    'startAt' => $startAt,
+                    'maxResults' => $pageSize,
+                ])
+            );
+
+            if (empty($pageUsers)) {
+                break;
+            }
+
+            $users = [...$users, ...$pageUsers];
+
+            if (count($pageUsers) < $pageSize) {
+                break;
+            }
+
+            $startAt += count($pageUsers);
+            $remaining -= count($pageUsers);
+        }
+
+        return $users;
+    }
+
+    private function searchIssuesPage(string $jql, int $maxResults, int $startAt): array
+    {
         $fields = ['summary', 'status', 'priority', 'issuetype', 'assignee', 'project'];
 
         $payload = [
@@ -113,22 +197,12 @@ class JiraApiService
             $response = $this->baseRequest()->get('/search/jql', [
                 'jql' => $jql,
                 'maxResults' => $maxResults,
+                'startAt' => $startAt,
                 'fields' => implode(',', $fields),
             ]);
         }
 
-        $data = $this->handleResponse($response);
-
-        return $data['issues'] ?? [];
-    }
-
-    public function getWorklogsForIssue(string $issueKey): array
-    {
-        $data = $this->handleResponse(
-            $this->baseRequest()->get("/issue/{$issueKey}/worklog")
-        );
-
-        return $data['worklogs'] ?? [];
+        return $this->handleResponse($response);
     }
 
     public function createWorklog(string $issueKey, int $timeSpentSeconds, Carbon $started, string $comment = ''): array

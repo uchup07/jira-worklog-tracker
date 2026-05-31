@@ -154,7 +154,9 @@ return [
         'default' => [
             'queues' => ['default'],
             'memory_limit' => 128,
-            'timeout' => 60,
+            // Sync jobs can run for several minutes when Jira projects have
+            // many issues/worklogs, so the desktop worker must outlive them.
+            'timeout' => 1200,
             'sleep' => 3,
         ],
     ],

@@ -49,18 +49,29 @@
             @endif
         </div>
 
-        <form method="POST" action="{{ route('sync') }}" x-data="{ busy: false }" @submit="busy = true">
-            @csrf
-            <button type="submit" class="btn btn-ghost btn-sm"
-                    :disabled="busy" :class="{ 'opacity-40': busy }">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <a href="{{ route('setup.project') }}" class="btn btn-ghost btn-sm">
                 <svg width="11" height="11" fill="none" stroke="currentColor"
-                     viewBox="0 0 24 24" stroke-width="2.2" :class="{ 'animate-spin': busy }">
-                    <path stroke-linecap="round"
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                     viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3 7.5h7l2 2h9v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/>
                 </svg>
-                <span x-text="busy ? 'Syncing…' : 'Sync'"></span>
-            </button>
-        </form>
+                Choose Project
+            </a>
+
+            <form method="POST" action="{{ route('sync') }}" x-data="{ busy: false }" @submit="busy = true">
+                @csrf
+                <button type="submit" class="btn btn-ghost btn-sm"
+                        :disabled="busy" :class="{ 'opacity-40': busy }">
+                    <svg width="11" height="11" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24" stroke-width="2.2" :class="{ 'animate-spin': busy }">
+                        <path stroke-linecap="round"
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span x-text="busy ? 'Syncing…' : 'Sync'"></span>
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 

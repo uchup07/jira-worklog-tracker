@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JiraIssue;
 use App\Models\JiraWorklog;
 use App\Services\JiraApiService;
-use App\Services\JiraSyncService;
+use App\Services\JiraBackgroundSyncService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Native\Desktop\Facades\Notification;
@@ -61,7 +61,7 @@ class WorklogController extends Controller
         return view('worklogs.create', compact('issues', 'selectedIssue'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, JiraBackgroundSyncService $backgroundSyncService)
     {
         $request->validate([
             'issue_key' => 'required|string',
@@ -87,9 +87,9 @@ class WorklogController extends Controller
         }
 
         try {
-            JiraSyncService::make()->syncProject(Settings::get('selected_project_key', ''));
-        } catch (\RuntimeException) {
-            // Sync failure should not block the user after successful creation
+            $backgroundSyncService->dispatch(Settings::get('selected_project_key', ''));
+        } catch (\Throwable) {
+            // Background sync failure should not block the user after successful creation.
         }
 
         $hours = round($seconds / 3600, 1);

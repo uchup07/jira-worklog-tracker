@@ -50,14 +50,20 @@ class SetupController extends Controller
 
     public function storeProject(Request $request, JiraBackgroundSyncService $backgroundSyncService)
     {
-        $request->validate(['project_key' => 'required|string']);
+        $validated = $request->validate([
+            'project_key' => 'required|string',
+            'project_name' => 'nullable|string',
+        ]);
 
-        return $this->setProjectAndRedirect($request->project_key, $backgroundSyncService);
+        $projectName = $this->resolveProjectName($validated['project_key'], $validated['project_name'] ?? null);
+
+        return $this->setProjectAndRedirect($validated['project_key'], $projectName, $backgroundSyncService);
     }
 
-    protected function setProjectAndRedirect(string $projectKey, JiraBackgroundSyncService $backgroundSyncService)
+    protected function setProjectAndRedirect(string $projectKey, string $projectName, JiraBackgroundSyncService $backgroundSyncService)
     {
         Settings::set('selected_project_key', $projectKey);
+        Settings::set('selected_project_name', $projectName);
 
         $message = "Project changed to {$projectKey}.";
 
@@ -72,6 +78,28 @@ class SetupController extends Controller
         return redirect()->route('dashboard')->with('success', $message);
     }
 
+    protected function resolveProjectName(string $projectKey, ?string $projectName = null): string
+    {
+        $projectName = trim((string) $projectName);
+
+        if ($projectName !== '') {
+            return $projectName;
+        }
+
+        try {
+            $project = collect(JiraApiService::fromSettings()->getProjects())
+                ->firstWhere('key', $projectKey);
+
+            if (is_array($project) && filled($project['name'] ?? null)) {
+                return $project['name'];
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        return $projectKey;
+    }
+
     public function settings()
     {
         return view('setup.index', [
@@ -82,9 +110,24 @@ class SetupController extends Controller
         ]);
     }
 
+    public function updateTheme(Request $request)
+    {
+        $validated = $request->validate([
+            'theme' => 'required|in:dark,light',
+        ]);
+
+        Settings::set('app_theme', $validated['theme']);
+
+        if ($request->expectsJson()) {
+            return response()->noContent();
+        }
+
+        return back();
+    }
+
     public function disconnect()
     {
-        foreach (['jira_domain', 'jira_email', 'jira_api_token', 'jira_account_id', 'jira_display_name', 'selected_project_key', 'last_synced_at', 'sync_in_progress', 'sync_started_at'] as $key) {
+        foreach (['jira_domain', 'jira_email', 'jira_api_token', 'jira_account_id', 'jira_display_name', 'selected_project_key', 'selected_project_name', 'last_synced_at', 'sync_in_progress', 'sync_started_at'] as $key) {
             Settings::forget($key);
         }
 

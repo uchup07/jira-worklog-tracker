@@ -1,14 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en"
+      data-theme="{{ $appTheme }}"
+      x-data="tallstackui_darkTheme({ default: @js($appTheme), name: 'app-theme' })"
+      x-bind:data-theme="darkTheme ? 'dark' : 'light'"
+      x-effect="window.appTheme && window.appTheme.sync(darkTheme ? 'dark' : 'light')">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Connect to Jira — Worklog Tracker</title>
     <tallstackui:script />
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body style="background:var(--bg); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; -webkit-app-region:drag;">
+<body x-bind:class="{ dark: darkTheme }"
+      style="background:var(--bg); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; -webkit-app-region:drag;">
+
+    <div class="titlebar-no-drag" style="position:fixed; top:16px; right:16px; z-index:20;">
+        <x-theme-switch simple only-icons sm class="app-theme-switch" />
+    </div>
 
     <div class="titlebar-no-drag" style="width:100%; max-width:400px;">
 

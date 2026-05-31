@@ -27,11 +27,20 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->ensureNativeDatabaseIsMigrated();
 
-        View::composer('layouts.app', function ($view) {
+        View::composer('*', function ($view) {
             $view->with('projectKey', Settings::get('selected_project_key', 'No project'));
+            $view->with('projectName', Settings::get('selected_project_name'));
+            $view->with('appTheme', $this->resolveAppTheme());
             $lastSynced = Settings::get('last_synced_at', null);
             $view->with('lastSynced', $lastSynced ? Carbon::parse($lastSynced)->diffForHumans() : null);
         });
+    }
+
+    protected function resolveAppTheme(): string
+    {
+        $theme = Settings::get('app_theme', 'dark');
+
+        return in_array($theme, ['dark', 'light'], true) ? $theme : 'dark';
     }
 
     protected function ensureNativeDatabaseIsMigrated(): void

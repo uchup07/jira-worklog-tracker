@@ -47,9 +47,16 @@
             <tbody>
                 @foreach($issues as $issue)
                     <tr>
-                        <td style="width:90px;"><span class="badge-key">{{ $issue->issue_key }}</span></td>
+                        <td style="width:90px;">
+                            <a href="{{ route('issues.show', $issue) }}" style="text-decoration:none;">
+                                <span class="badge-key">{{ $issue->issue_key }}</span>
+                            </a>
+                        </td>
                         <td style="color:var(--text); font-size:13px; max-width:0;">
-                            <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $issue->summary }}</div>
+                            <a href="{{ route('issues.show', $issue) }}"
+                               style="display:block; color:inherit; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                {{ $issue->summary }}
+                            </a>
                         </td>
                         <td style="font-size:12px; color:var(--text-muted);">{{ $issue->issue_type }}</td>
                         <td style="font-size:12px; color:var(--text-muted);">{{ $issue->priority ?? '—' }}</td>

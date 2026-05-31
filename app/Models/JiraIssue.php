@@ -26,6 +26,11 @@ class JiraIssue extends Model
         ];
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'issue_key';
+    }
+
     public function scopeForProject(Builder $query, string $projectKey): Builder
     {
         return $query->where('project_key', $projectKey);

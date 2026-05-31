@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en"
+      data-theme="{{ $appTheme }}"
+      x-data="tallstackui_darkTheme({ default: @js($appTheme), name: 'app-theme' })"
+      x-bind:data-theme="darkTheme ? 'dark' : 'light'"
+      x-effect="window.appTheme && window.appTheme.sync(darkTheme ? 'dark' : 'light')">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +20,8 @@
     slot leaves room for the three dots. Interactive children carry
     .titlebar-no-drag (or .btn / .nav-link which already have no-drag).
 --}}
-<body style="background:var(--bg); height:100vh; display:flex; flex-direction:column; overflow:hidden;">
+<body x-bind:class="{ dark: darkTheme }"
+      style="background:var(--bg); height:100vh; display:flex; flex-direction:column; overflow:hidden;">
 
 {{-- ── Titlebar: drag region across full width ── --}}
 <div class="titlebar-drag"
@@ -38,18 +43,35 @@
                 padding:0 14px; background:var(--surface); border-bottom:1px solid var(--border);">
 
         <div style="display:flex; align-items:center; gap:10px;">
-            <span class="mono"
-                  style="font-size:11px; font-weight:500; color:var(--accent);
-                         background:var(--accent-dim); padding:2px 8px; border-radius:4px;
-                         border:1px solid oklch(0.857 0.168 87.5 / 0.18);">
-                {{ $projectKey ?? 'No project' }}
-            </span>
+            <button type="button" class="btn btn-ghost btn-sm"
+                    onclick="window.history.length > 1 ? window.history.back() : window.location.href='{{ route('dashboard') }}'">
+                <svg width="11" height="11" fill="none" stroke="currentColor"
+                     viewBox="0 0 24 24" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/>
+                </svg>
+                Back
+            </button>
+            <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                <span class="mono"
+                      style="font-size:11px; font-weight:500; color:var(--accent);
+                             background:var(--accent-dim); padding:2px 8px; border-radius:4px;
+                             border:1px solid oklch(0.857 0.168 87.5 / 0.18); flex-shrink:0;">
+                    {{ $projectKey ?? 'No project' }}
+                </span>
+                @if(! empty($projectName))
+                    <span style="font-size:12.5px; font-weight:600; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        {{ $projectName }}
+                    </span>
+                @endif
+            </div>
             @if(isset($lastSynced) && $lastSynced)
                 <span style="font-size:11.5px; color:var(--text-subtle);">synced {{ $lastSynced }}</span>
             @endif
         </div>
 
         <div style="display:flex; align-items:center; gap:8px;">
+            <x-theme-switch simple only-icons sm class="app-theme-switch titlebar-no-drag" />
+
             <a href="{{ route('setup.project') }}" class="btn btn-ghost btn-sm">
                 <svg width="11" height="11" fill="none" stroke="currentColor"
                      viewBox="0 0 24 24" stroke-width="2">

@@ -1,14 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      data-theme="{{ $appTheme }}"
+      x-data="tallstackui_darkTheme({ default: @js($appTheme), name: 'app-theme' })"
+      x-bind:data-theme="darkTheme ? 'dark' : 'light'"
+      x-effect="window.appTheme && window.appTheme.sync(darkTheme ? 'dark' : 'light')">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Select Project — Worklog Tracker</title>
     <tallstackui:script />
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body style="background:var(--bg); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; -webkit-app-region:drag;">
+<body x-bind:class="{ dark: darkTheme }"
+      style="background:var(--bg); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; -webkit-app-region:drag;">
+
+    <div class="titlebar-no-drag" style="position:fixed; top:16px; right:16px; z-index:20;">
+        <x-theme-switch simple only-icons sm class="app-theme-switch" />
+    </div>
 
     <div class="titlebar-no-drag" style="width:100%; max-width:460px;">
 
@@ -41,9 +51,11 @@
                 </a>
             @else
                 <form method="POST" action="{{ route('setup.project.store') }}"
-                      x-data="{ submitting: false, selected: '{{ $projects[0]['key'] ?? '' }}' }"
+                      x-data="{ submitting: false, selected: @js($projects[0]['key'] ?? ''), selectedName: @js($projects[0]['name'] ?? '') }"
                       @submit="submitting = true">
                     @csrf
+
+                    <input type="hidden" name="project_name" x-model="selectedName">
 
                     <div style="display:flex; flex-direction:column; gap:5px; max-height:300px; overflow-y:auto; margin-bottom:16px;">
                         @foreach($projects as $project)
@@ -51,7 +63,7 @@
                                    style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius); background:var(--surface-2); border:1px solid var(--border); cursor:pointer; transition:all 100ms;">
                                 <input type="radio" name="project_key" value="{{ $project['key'] }}"
                                        {{ $loop->first ? 'checked' : '' }}
-                                       @change="selected = '{{ $project['key'] }}'"
+                                       @change="selected = @js($project['key']); selectedName = @js($project['name'])"
                                        style="accent-color:var(--accent); width:13px; height:13px; flex-shrink:0;">
                                 <span class="mono" style="font-size:11px; font-weight:500; color:var(--accent); background:var(--accent-dim); padding:2px 6px; border-radius:3px; flex-shrink:0;">
                                     {{ $project['key'] }}
@@ -64,6 +76,9 @@
                     </div>
 
                     @error('project_key')
+                        <p style="font-size:11.5px; color:var(--red); margin-bottom:12px;">{{ $message }}</p>
+                    @enderror
+                    @error('project_name')
                         <p style="font-size:11.5px; color:var(--red); margin-bottom:12px;">{{ $message }}</p>
                     @enderror
 

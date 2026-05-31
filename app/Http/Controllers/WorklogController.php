@@ -63,24 +63,25 @@ class WorklogController extends Controller
 
     public function store(Request $request, JiraBackgroundSyncService $backgroundSyncService)
     {
-        $request->validate([
+        $validated = $request->validate([
             'issue_key' => 'required|string',
             'time_spent' => 'required|string',
             'started_at' => 'required|date',
             'comment' => 'nullable|string|max:2000',
+            'return_to_issue' => 'nullable|boolean',
         ]);
 
         try {
-            $seconds = JiraApiService::parseTimeToSeconds($request->time_spent);
+            $seconds = JiraApiService::parseTimeToSeconds($validated['time_spent']);
         } catch (\InvalidArgumentException) {
             return back()->withErrors(['time_spent' => 'Invalid time format. Use "1h 30m", "2h", or "30m".'])->withInput();
         }
 
-        $started = Carbon::parse($request->started_at)->startOfDay()->utc();
+        $started = Carbon::parse($validated['started_at'])->startOfDay()->utc();
 
         try {
             JiraApiService::fromSettings()->createWorklog(
-                $request->issue_key, $seconds, $started, $request->comment ?? ''
+                $validated['issue_key'], $seconds, $started, $validated['comment'] ?? ''
             );
         } catch (\RuntimeException $e) {
             return back()->with('error', 'Failed to create worklog: '.$e->getMessage())->withInput();
@@ -96,9 +97,12 @@ class WorklogController extends Controller
 
         Notification::new()
             ->title('Worklog Created')
-            ->message("{$hours}h logged to {$request->issue_key}")
+            ->message("{$hours}h logged to {$validated['issue_key']}")
             ->show();
 
-        return redirect()->route('worklogs.index')->with('success', 'Worklog created successfully.');
+        $redirectRoute = ! empty($validated['return_to_issue']) ? 'issues.show' : 'worklogs.index';
+        $redirectParameters = ! empty($validated['return_to_issue']) ? ['issue' => $validated['issue_key']] : [];
+
+        return redirect()->route($redirectRoute, $redirectParameters)->with('success', 'Worklog created successfully.');
     }
 }

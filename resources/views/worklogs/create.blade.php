@@ -21,7 +21,7 @@
                 <div>
                     <label style="display:block; font-size:12px; font-weight:500; color:var(--text-muted); margin-bottom:5px;">Issue</label>
                     <select name="issue_key"
-                            style="width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:7px 10px; font-size:13px; font-family:'Geist',sans-serif; color:var(--text); outline:none; color-scheme:dark;">
+                            style="width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:7px 10px; font-size:13px; font-family:'Geist',sans-serif; color:var(--text); outline:none;">
                         <option value="">Select an issue…</option>
                         @foreach($issues as $issue)
                             <option value="{{ $issue->issue_key }}"

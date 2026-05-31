@@ -100,10 +100,10 @@ new class extends Component
 
         <div style="display:flex; align-items:center; gap:6px;">
             <input type="date" wire:model.live="from"
-                   style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:5px 9px; font-size:12.5px; font-family:'Geist',sans-serif; color:var(--text); outline:none; color-scheme:dark;">
+                   style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:5px 9px; font-size:12.5px; font-family:'Geist',sans-serif; color:var(--text); outline:none;">
             <span style="font-size:11px; color:var(--text-muted);">—</span>
             <input type="date" wire:model.live="to"
-                   style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:5px 9px; font-size:12.5px; font-family:'Geist',sans-serif; color:var(--text); outline:none; color-scheme:dark;">
+                   style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:5px 9px; font-size:12.5px; font-family:'Geist',sans-serif; color:var(--text); outline:none;">
         </div>
 
         @if($author || $from || $to || $mine)

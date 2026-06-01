@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\JiraProjectUser;
+use App\Models\JiraWorklog;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -55,9 +57,6 @@ test('utilization component months list last entry is 11 months ago', function (
             return $months[11]['value'] === now()->subMonths(11)->format('Y-m');
         });
 });
-
-use App\Models\JiraProjectUser;
-use App\Models\JiraWorklog;
 
 test('utilization rows include all active users from selected project', function () {
     JiraProjectUser::create([
@@ -301,4 +300,20 @@ test('utilization target hours equals 8 times weekday count in month', function 
     Livewire::test('utilization', ['month' => '2026-06'])
         ->assertViewHas('workingDays', 22)
         ->assertViewHas('targetHours', 176.0);
+});
+
+test('utilization excludes users from other projects', function () {
+    JiraProjectUser::create([
+        'project_key' => 'OTHER',
+        'account_id' => 'user-other-project',
+        'display_name' => 'Other Project User',
+        'active' => true,
+        'source' => 'assignable',
+        'synced_at' => now(),
+    ]);
+
+    Livewire::test('utilization')
+        ->assertViewHas('rows', function ($rows) {
+            return ! in_array('user-other-project', array_column($rows, 'account_id'));
+        });
 });

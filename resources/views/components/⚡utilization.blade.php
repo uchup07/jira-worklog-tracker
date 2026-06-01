@@ -18,11 +18,6 @@ new class extends Component
         $this->selectedProject = Settings::get('selected_project_key', '');
     }
 
-    public function updatedMonth(): void
-    {
-        // reactive — with() re-runs automatically
-    }
-
     public function with(): array
     {
         $months = collect(range(0, 11))->map(function (int $i) {
@@ -83,7 +78,7 @@ new class extends Component
 
     private function calculateMonthMeta(): array
     {
-        $start = Carbon::createFromFormat('Y-m', $this->month)->startOfMonth();
+        $start = Carbon::parse($this->month.'-01')->startOfMonth();
         $end = $start->copy()->endOfMonth();
 
         $workingDays = 0;

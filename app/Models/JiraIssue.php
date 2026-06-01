@@ -16,6 +16,8 @@ class JiraIssue extends Model
         'assignee_display_name',
         'priority',
         'issue_type',
+        'sprint',
+        'epic',
         'synced_at',
     ];
 

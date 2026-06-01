@@ -11,6 +11,7 @@ class JiraProjectUser extends Model
         'project_key',
         'account_id',
         'display_name',
+        'email',
         'active',
         'source',
         'synced_at',

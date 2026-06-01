@@ -10,7 +10,9 @@ use Native\Desktop\Facades\Settings;
 class JiraApiService
 {
     private const SEARCH_PAGE_SIZE = 100;
+
     private const WORKLOG_PAGE_SIZE = 100;
+
     private const USER_PAGE_SIZE = 100;
 
     public function __construct(
@@ -179,7 +181,11 @@ class JiraApiService
 
     private function searchIssuesPage(string $jql, int $maxResults, int $startAt): array
     {
-        $fields = ['summary', 'status', 'priority', 'issuetype', 'assignee', 'project'];
+        $fields = [
+            'summary', 'status', 'priority', 'issuetype', 'assignee', 'project',
+            'customfield_10020',   // Sprint
+            'customfield_10014',   // Epic Link
+        ];
 
         $payload = [
             'jql' => $jql,

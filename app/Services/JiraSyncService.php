@@ -58,6 +58,8 @@ class JiraSyncService
                 'assignee_display_name' => $fields['assignee']['displayName'] ?? null,
                 'priority' => $fields['priority']['name'] ?? null,
                 'issue_type' => $fields['issuetype']['name'] ?? 'Task',
+                'sprint' => $this->extractSprint($fields['customfield_10020'] ?? null),
+                'epic' => $fields['customfield_10014'] ?? null,
                 'synced_at' => now()->toDateTimeString(),
                 'created_at' => now()->toDateTimeString(),
                 'updated_at' => now()->toDateTimeString(),
@@ -66,7 +68,8 @@ class JiraSyncService
 
         JiraIssue::upsert($rows, ['issue_key'], [
             'summary', 'status', 'project_key', 'assignee_account_id',
-            'assignee_display_name', 'priority', 'issue_type', 'synced_at', 'updated_at',
+            'assignee_display_name', 'priority', 'issue_type', 'sprint', 'epic',
+            'synced_at', 'updated_at',
         ]);
 
         return count($rows);
@@ -132,6 +135,7 @@ class JiraSyncService
                 'project_key' => $projectKey,
                 'account_id' => $user['accountId'] ?? null,
                 'display_name' => $user['displayName'] ?? null,
+                'email' => $user['emailAddress'] ?? null,
                 'active' => $user['active'] ?? true,
                 'source' => 'assignable',
             ])
@@ -145,6 +149,7 @@ class JiraSyncService
                 'project_key' => $projectKey,
                 'account_id' => $issue->assignee_account_id,
                 'display_name' => $issue->assignee_display_name,
+                'email' => null,
                 'active' => true,
                 'source' => 'issue-assignee',
             ]);
@@ -157,6 +162,7 @@ class JiraSyncService
                 'project_key' => $projectKey,
                 'account_id' => $worklog->author_account_id,
                 'display_name' => $worklog->author_display_name,
+                'email' => null,
                 'active' => true,
                 'source' => 'worklog-author',
             ]);
@@ -179,10 +185,20 @@ class JiraSyncService
         }
 
         JiraProjectUser::upsert($rows, ['project_key', 'account_id'], [
-            'display_name', 'active', 'source', 'synced_at', 'updated_at',
+            'display_name', 'active', 'source', 'email', 'synced_at', 'updated_at',
         ]);
 
         return count($rows);
+    }
+
+    public function extractSprint(?array $sprints): ?string
+    {
+        if (empty($sprints)) {
+            return null;
+        }
+        $active = collect($sprints)->firstWhere('state', 'active');
+
+        return ($active ?? $sprints[0])['name'] ?? null;
     }
 
     private function extractComment(mixed $comment): string

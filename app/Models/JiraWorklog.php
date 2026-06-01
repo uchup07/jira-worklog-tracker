@@ -34,7 +34,7 @@ class JiraWorklog extends Model
 
     public function scopeInDateRange(Builder $query, Carbon $from, Carbon $to): Builder
     {
-        return $query->whereBetween('started_at', [$from, $to]);
+        return $query->whereBetween('jira_worklogs.started_at', [$from, $to]);
     }
 
     public function scopeForProject(Builder $query, string $projectKey): Builder

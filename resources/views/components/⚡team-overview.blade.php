@@ -65,10 +65,12 @@ new class extends Component
             ->distinct()
             ->pluck('author_account_id');
 
-        $usersNotLogging = JiraProjectUser::forProject($projectKey)
-            ->where('active', true)
-            ->whereNotIn('account_id', $loggedAuthorIds)
-            ->get();
+        $usersNotLogging = $projectKey
+            ? JiraProjectUser::forProject($projectKey)
+                ->where('active', true)
+                ->whereNotIn('account_id', $loggedAuthorIds)
+                ->get()
+            : collect();
 
         $topContributors = JiraWorklog::forProject($projectKey)
             ->inDateRange($from, $to)

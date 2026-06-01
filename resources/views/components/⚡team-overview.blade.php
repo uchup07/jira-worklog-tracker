@@ -183,6 +183,7 @@ new class extends Component
                         style="font-size:12px; padding:5px 10px; border-radius:6px;
                                border:1px solid var(--border); background:var(--surface-2);
                                color:var(--text); cursor:pointer;">
+                    <option value="">All Projects</option>
                     @foreach($availableProjects as $p)
                         <option value="{{ $p['value'] }}">{{ $p['label'] }}</option>
                     @endforeach
@@ -192,8 +193,10 @@ new class extends Component
             @endif
 
             @foreach(['week' => 'This Week', 'month' => 'This Month', '3months' => '3 Months'] as $val => $label)
-                <button wire:click="$set('period', '{{ $val }}')"
-                        style="font-size:11.5px; padding:4px 10px; border-radius:5px; cursor:pointer;
+                <button type="button"
+                        wire:click="$set('period', '{{ $val }}')"
+                        aria-pressed="{{ $period === $val ? 'true' : 'false' }}"
+                        style="font-size:11px; padding:4px 10px; border-radius:5px; cursor:pointer;
                                border:1px solid {{ $period === $val ? 'var(--accent)' : 'var(--border)' }};
                                background:{{ $period === $val ? 'var(--accent-dim)' : 'transparent' }};
                                color:{{ $period === $val ? 'var(--accent)' : 'var(--text-muted)' }};">
@@ -240,7 +243,7 @@ new class extends Component
         {{-- Users Not Logging --}}
         <div class="card" style="padding:14px 16px;">
             <div style="font-size:10px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Not Logging</div>
-            <div class="stat-num" style="font-size:32px; color:{{ $usersNotLogging->isNotEmpty() ? 'var(--red, #f87171)' : 'var(--text)' }};">
+            <div class="stat-num" style="font-size:32px; color:{{ $usersNotLogging->isNotEmpty() ? 'var(--red)' : 'var(--text)' }};">
                 {{ $usersNotLogging->count() }}
             </div>
             @if($usersNotLogging->isNotEmpty())

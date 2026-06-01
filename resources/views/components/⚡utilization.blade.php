@@ -17,9 +17,18 @@ new class extends Component
 
     public function with(): array
     {
+        $months = collect(range(0, 11))->map(function (int $i) {
+            $date = now()->subMonths($i)->startOfMonth();
+
+            return [
+                'value' => $date->format('Y-m'),
+                'label' => $date->format('F Y'),
+            ];
+        })->toArray();
+
         return [
             'rows' => [],
-            'months' => [],
+            'months' => $months,
             'targetHours' => 0.0,
             'workingDays' => 0,
         ];

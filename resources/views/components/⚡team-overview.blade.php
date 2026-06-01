@@ -369,7 +369,7 @@ new class extends Component
                             <tr>
                                 <td><span class="badge-key">{{ $pj->project_key }}</span></td>
                                 <td style="text-align:right;" class="display">
-                                    {{ $rH }}h@if($rM > 0) {{ $rM }}m@endif
+                                    {{ $rH }}h{{ $rM > 0 ? " {$rM}m" : '' }}
                                 </td>
                             </tr>
                         @endforeach

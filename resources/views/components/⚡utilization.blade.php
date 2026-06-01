@@ -97,6 +97,105 @@ new class extends Component
 };
 ?>
 
-<div>
-    {{-- placeholder --}}
+<div style="display:flex; flex-direction:column; gap:14px;">
+
+    {{-- Filter bar --}}
+    <div style="display:flex; align-items:center; gap:10px; padding:10px 14px;
+                background:var(--surface); border:1px solid var(--border);
+                border-radius:var(--radius); flex-wrap:wrap;">
+
+        <select wire:model.live="month"
+                style="background:var(--surface-2); border:1px solid var(--border);
+                       border-radius:var(--radius); padding:5px 9px; font-size:12.5px;
+                       font-family:'Geist',sans-serif; color:var(--text); outline:none; cursor:pointer;">
+            @foreach($months as $m)
+                <option value="{{ $m['value'] }}">{{ $m['label'] }}</option>
+            @endforeach
+        </select>
+
+        <span style="font-size:12px; color:var(--text-muted);">
+            {{ $workingDays }} working days &middot; {{ $targetHours }}h target
+        </span>
+    </div>
+
+    {{-- Table --}}
+    @if(empty($rows))
+        <div class="card" style="padding:40px; text-align:center;">
+            <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                 stroke-width="1.2" style="color:var(--text-subtle); margin:0 auto 10px; display:block;">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>
+            </svg>
+            <p style="font-size:13px; color:var(--text-muted);">No team members found. Try syncing the project first.</p>
+        </div>
+    @else
+        <div class="card" style="overflow:hidden;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Worklog</th>
+                        <th>Target</th>
+                        <th>Utilization</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($rows as $row)
+                        @php
+                            $color = match($row['color_band']) {
+                                'green'  => 'var(--green)',
+                                'yellow' => 'var(--accent)',
+                                default  => 'var(--red)',
+                            };
+                            $dimColor = match($row['color_band']) {
+                                'green'  => 'oklch(0.750 0.170 142 / 0.10)',
+                                'yellow' => 'var(--accent-dim)',
+                                default  => 'oklch(0.650 0.220 25 / 0.10)',
+                            };
+                            $barWidth = $row['utilization_pct'] !== null
+                                ? min((float) $row['utilization_pct'], 100)
+                                : 0;
+
+                            $h = floor($row['actual_seconds'] / 3600);
+                            $m = floor(($row['actual_seconds'] % 3600) / 60);
+                            $actualFormatted = $h > 0
+                                ? "{$h}h" . ($m > 0 ? " {$m}m" : '')
+                                : "{$m}m";
+                        @endphp
+                        <tr>
+                            <td style="font-size:13px; font-weight:500; color:var(--text);">
+                                {{ $row['display_name'] }}
+                            </td>
+                            <td>
+                                <span style="font-size:14px; font-weight:700; letter-spacing:-0.03em;
+                                             color:var(--text);">{{ $actualFormatted }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size:13px; color:var(--text-muted);">
+                                    {{ $row['target_hours'] }}h
+                                </span>
+                            </td>
+                            <td style="position:relative; min-width:120px;">
+                                {{-- Progress bar background --}}
+                                <div style="position:absolute; inset:0; width:{{ $barWidth }}%;
+                                            background:{{ $dimColor }}; z-index:0;
+                                            transition:width 300ms ease;"></div>
+                                {{-- Text --}}
+                                <span style="position:relative; z-index:1; font-size:14px;
+                                             font-weight:700; letter-spacing:-0.03em;
+                                             color:{{ $color }};">
+                                    @if($row['utilization_pct'] !== null)
+                                        {{ $row['utilization_pct'] }}%
+                                    @else
+                                        &mdash;
+                                    @endif
+                                </span>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
+
 </div>

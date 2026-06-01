@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Native\Desktop\Facades\Settings;
@@ -7,6 +8,8 @@ use Native\Desktop\Facades\Settings;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    Carbon::setTestNow(Carbon::now());
+
     Settings::shouldReceive('get')
         ->andReturnUsing(function (string $key, mixed $default = null) {
             return match ($key) {
@@ -17,6 +20,10 @@ beforeEach(function () {
                 default => $default,
             };
         });
+});
+
+afterEach(function () {
+    Carbon::setTestNow();
 });
 
 test('utilization page loads', function () {

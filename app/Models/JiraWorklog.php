@@ -39,7 +39,11 @@ class JiraWorklog extends Model
 
     public function scopeForProject(Builder $query, string $projectKey): Builder
     {
-        return $query->whereIn('issue_key', function ($subQuery) use ($projectKey) {
+        if ($projectKey === '') {
+            return $query;
+        }
+
+        return $query->whereIn('jira_worklogs.issue_key', function ($subQuery) use ($projectKey) {
             $subQuery->select('issue_key')
                 ->from('jira_issues')
                 ->where('project_key', $projectKey);

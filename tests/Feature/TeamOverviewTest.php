@@ -39,3 +39,18 @@ test('period can be changed to 3months', function () {
         ->set('period', '3months')
         ->assertSet('period', '3months');
 });
+
+test('team overview exposes all required view data keys', function () {
+    Livewire::test('team-overview')
+        ->assertViewHasAll([
+            'totalWorkSeconds',
+            'totalWorklogsToday',
+            'totalWorklogsMonth',
+            'activeUsers',
+            'usersNotLogging',
+            'topContributors',
+            'worklogsPerStatus',
+            'worklogsPerProject',
+            'availableProjects',
+        ]);
+});

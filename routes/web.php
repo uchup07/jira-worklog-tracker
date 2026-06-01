@@ -20,6 +20,7 @@ Route::post('/setup/disconnect', [SetupController::class, 'disconnect'])->name('
 Route::middleware(EnsureJiraConnected::class)->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/team-overview', fn () => view('team-overview.index'))->name('team-overview');
+    Route::get('/utilization', fn () => view('utilization.index'))->name('utilization.index');
 
     Route::get('/issues', [IssueController::class, 'index'])->name('issues.index');
     Route::get('/issues/{issue}', [IssueController::class, 'show'])->name('issues.show');

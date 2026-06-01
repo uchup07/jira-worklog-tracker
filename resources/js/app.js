@@ -1,3 +1,5 @@
+import ApexCharts from 'apexcharts';
+
 window.appTheme = {
     lastTheme: null,
 
@@ -32,3 +34,5 @@ window.appTheme = {
         }
     },
 };
+
+window.ApexCharts = ApexCharts;

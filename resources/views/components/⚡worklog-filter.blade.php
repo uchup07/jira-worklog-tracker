@@ -60,7 +60,24 @@ new class extends Component
         $accountId = Settings::get('jira_account_id');
         $projectKey = Settings::get('selected_project_key');
 
-        $query = JiraWorklog::query()->forProject($projectKey);
+        $query = JiraWorklog::query()
+            ->leftJoin('jira_issues', 'jira_worklogs.issue_key', '=', 'jira_issues.issue_key')
+            ->select([
+                'jira_worklogs.id',
+                'jira_worklogs.jira_worklog_id',
+                'jira_worklogs.issue_key',
+                'jira_worklogs.author_account_id',
+                'jira_worklogs.author_display_name',
+                'jira_worklogs.time_spent_seconds',
+                'jira_worklogs.started_at',
+                'jira_worklogs.comment',
+                'jira_issues.summary',
+                'jira_issues.issue_type',
+                'jira_issues.status as issue_status',
+                'jira_issues.sprint',
+                'jira_issues.epic',
+            ])
+            ->forProject($projectKey);
 
         if ($this->mine && $accountId) {
             $query->forAuthor($accountId);
@@ -69,14 +86,14 @@ new class extends Component
         }
 
         if ($this->from) {
-            $query->where('started_at', '>=', $this->from);
+            $query->where('jira_worklogs.started_at', '>=', $this->from);
         }
         if ($this->to) {
-            $query->where('started_at', '<=', $this->to.' 23:59:59');
+            $query->where('jira_worklogs.started_at', '<=', $this->to.' 23:59:59');
         }
 
         return [
-            'worklogs' => $query->orderByDesc('started_at')->paginate(30),
+            'worklogs' => $query->orderByDesc('jira_worklogs.started_at')->paginate(30),
             'authors' => JiraProjectUser::query()->forProject($projectKey)
                 ->orderBy('display_name')
                 ->get(),
@@ -135,6 +152,10 @@ new class extends Component
                 <thead>
                     <tr>
                         <th>Issue</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Sprint</th>
+                        <th>Epic</th>
                         <th>Author</th>
                         <th>Date</th>
                         <th>Time</th>
@@ -150,7 +171,22 @@ new class extends Component
                             $me = $wl->author_account_id === $accountId;
                         @endphp
                         <tr>
-                            <td><span class="badge-key">{{ $wl->issue_key }}</span></td>
+                            <td>
+                                <span class="badge-key">{{ $wl->issue_key }}</span>
+                                @if($wl->summary)
+                                    <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $wl->summary }}</div>
+                                @endif
+                            </td>
+                            <td style="font-size:11.5px; color:var(--text-muted);">{{ $wl->issue_type ?: '—' }}</td>
+                            <td>
+                                @if($wl->issue_status)
+                                    <span class="badge-status">{{ $wl->issue_status }}</span>
+                                @else
+                                    <span style="font-size:11.5px; color:var(--text-muted);">—</span>
+                                @endif
+                            </td>
+                            <td style="font-size:11.5px; color:var(--text-muted); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $wl->sprint ?: '—' }}</td>
+                            <td style="font-size:11.5px; color:var(--text-muted);">{{ $wl->epic ?: '—' }}</td>
                             <td style="font-size:13px; color:{{ $me ? 'var(--text)' : 'var(--text-muted)' }}; font-weight:{{ $me ? '500' : '400' }};">
                                 {{ $wl->author_display_name }}
                                 @if($me)<x-badge text="you" color="yellow" style="margin-left:4px;" />@endif
@@ -161,7 +197,7 @@ new class extends Component
                             <td>
                                 <span style="font-size:14px; font-weight:700; letter-spacing:-0.03em; color:var(--text);">{{ $t }}</span>
                             </td>
-                            <td style="font-size:12.5px; color:var(--text-muted); max-width:220px;">
+                            <td style="font-size:12.5px; color:var(--text-muted); max-width:200px;">
                                 <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $wl->comment ?: '—' }}</div>
                             </td>
                         </tr>

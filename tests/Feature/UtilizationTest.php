@@ -134,7 +134,8 @@ test('utilization sums worklogs across all projects for a user', function () {
         'synced_at' => now(),
     ]);
 
-    Livewire::test('utilization', ['month' => $month])
+    Livewire::test('utilization')
+        ->set('month', $month)
         ->assertViewHas('rows', function ($rows) {
             $row = collect($rows)->firstWhere('account_id', 'user-multi');
 
@@ -297,7 +298,8 @@ test('utilization rows are sorted descending by utilization_pct', function () {
 
 test('utilization target hours equals 8 times weekday count in month', function () {
     // June 2026 has 22 weekdays (Mon 1 Jun – Tue 30 Jun) → 176h target
-    Livewire::test('utilization', ['month' => '2026-06'])
+    Livewire::test('utilization')
+        ->set('month', '2026-06')
         ->assertViewHas('workingDays', 22)
         ->assertViewHas('targetHours', 176.0);
 });

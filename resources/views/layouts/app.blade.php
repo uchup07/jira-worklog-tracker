@@ -55,7 +55,7 @@
             <x-side-bar.item text="Dashboard"    route="{{ route('dashboard') }}"       icon="home" />
             <x-side-bar.item text="Team Overview" route="{{ route('team-overview') }}" icon="chart-bar" />
             <x-side-bar.item text="My Issues"  route="{{ route('issues.index') }}"    icon="clipboard-document-list" />
-            <x-side-bar.item text="Worklogs"   route="{{ route('worklogs.index') }}"  icon="clock" />
+            <x-side-bar.item text="Worklogs"   route="{{ route('worklogs.monitoring') }}"  icon="clock" />
             <x-side-bar.separator />
             <x-side-bar.item text="Log Time"   route="{{ route('worklogs.create') }}" icon="plus" />
 

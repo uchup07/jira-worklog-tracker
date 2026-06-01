@@ -25,7 +25,7 @@ class NativeAppServiceProvider implements ProvidesPhpIni
             Menu::make(
                 Menu::route('worklogs.create', 'New Worklog', 'CmdOrCtrl+N'),
                 Menu::separator(),
-                Menu::route('worklogs.index', 'View Worklogs', null),
+                Menu::route('worklogs.monitoring', 'View Worklogs', null),
                 Menu::route('issues.index', 'My Issues', null),
                 Menu::separator(),
                 Menu::label('Sync with Jira', 'CmdOrCtrl+R')->event('jira.sync'),

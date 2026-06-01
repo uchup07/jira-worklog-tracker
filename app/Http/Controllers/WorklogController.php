@@ -3,47 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\JiraIssue;
-use App\Models\JiraWorklog;
 use App\Services\JiraApiService;
 use App\Services\JiraBackgroundSyncService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Native\Desktop\Facades\Notification;
 use Native\Desktop\Facades\Settings;
 
 class WorklogController extends Controller
 {
-    public function index(Request $request)
+    public function monitoring(): View
     {
-        $projectKey = Settings::get('selected_project_key', '');
-        $accountId = Settings::get('jira_account_id', '');
-
-        $query = JiraWorklog::forProject($projectKey)
-            ->orderByDesc('started_at');
-
-        if ($request->filled('author')) {
-            $query->forAuthor($request->author);
-        }
-
-        if ($request->boolean('mine')) {
-            $query->forAuthor($accountId);
-        }
-
-        if ($request->filled('from')) {
-            $from = Carbon::parse($request->from)->startOfDay();
-            $to = $request->filled('to') ? Carbon::parse($request->to)->endOfDay() : Carbon::now()->endOfDay();
-            $query->inDateRange($from, $to);
-        }
-
-        $worklogs = $query->paginate(30);
-
-        $authors = JiraWorklog::forProject($projectKey)
-            ->selectRaw('author_account_id, author_display_name')
-            ->groupBy('author_account_id', 'author_display_name')
-            ->orderBy('author_display_name')
-            ->get();
-
-        return view('worklogs.index', compact('worklogs', 'authors', 'accountId'));
+        return view('worklogs.monitoring');
     }
 
     public function create(Request $request)
@@ -100,7 +72,7 @@ class WorklogController extends Controller
             ->message("{$hours}h logged to {$validated['issue_key']}")
             ->show();
 
-        $redirectRoute = ! empty($validated['return_to_issue']) ? 'issues.show' : 'worklogs.index';
+        $redirectRoute = ! empty($validated['return_to_issue']) ? 'issues.show' : 'worklogs.monitoring';
         $redirectParameters = ! empty($validated['return_to_issue']) ? ['issue' => $validated['issue_key']] : [];
 
         return redirect()->route($redirectRoute, $redirectParameters)->with('success', 'Worklog created successfully.');

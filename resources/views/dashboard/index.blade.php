@@ -43,7 +43,7 @@
         <div class="card" style="overflow:hidden;">
             <div style="padding:13px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
                 <span style="font-size:12.5px; font-weight:600; color:var(--text);">Recent Logs</span>
-                <a href="{{ route('worklogs.index') }}" style="font-size:11px; color:var(--text-muted); text-decoration:none; display:flex; align-items:center; gap:3px;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
+                <a href="{{ route('worklogs.monitoring') }}" style="font-size:11px; color:var(--text-muted); text-decoration:none; display:flex; align-items:center; gap:3px;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">
                     all <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
             </div>

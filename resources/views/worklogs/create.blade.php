@@ -62,7 +62,7 @@
                                   x-bind:loading="submitting">
                             Log Time
                         </x-button>
-                        <x-button href="{{ route('worklogs.index') }}"
+                        <x-button href="{{ route('worklogs.monitoring') }}"
                                   color="secondary"
                                   light>
                             Cancel

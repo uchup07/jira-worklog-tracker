@@ -24,11 +24,13 @@ Route::middleware(EnsureJiraConnected::class)->group(function () {
     Route::get('/issues', [IssueController::class, 'index'])->name('issues.index');
     Route::get('/issues/{issue}', [IssueController::class, 'show'])->name('issues.show');
 
-    Route::get('/worklogs', [WorklogController::class, 'index'])->name('worklogs.index');
+    Route::get('/worklogs/monitoring', [WorklogController::class, 'monitoring'])->name('worklogs.monitoring');
+    Route::get('/worklogs/missing', fn () => view('worklogs.missing'))->name('worklogs.missing');
     Route::get('/worklogs/create', [WorklogController::class, 'create'])->name('worklogs.create');
     Route::post('/worklogs', [WorklogController::class, 'store'])->name('worklogs.store');
 
     Route::post('/sync', [SyncController::class, 'sync'])->name('sync');
 
     Route::get('/settings', [SetupController::class, 'settings'])->name('settings');
+    Route::post('/setup/smtp', [SetupController::class, 'updateSmtp'])->name('setup.smtp');
 });

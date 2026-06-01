@@ -172,7 +172,10 @@ new class extends Component
                         @endphp
                         <tr>
                             <td>
-                                <span class="badge-key">{{ $wl->issue_key }}</span>
+                                <a href="{{ route('issues.show', $wl->issue_key) }}"
+                                   style="text-decoration:none;">
+                                    <span class="badge-key" style="cursor:pointer;">{{ $wl->issue_key }}</span>
+                                </a>
                                 @if($wl->summary)
                                     <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $wl->summary }}</div>
                                 @endif

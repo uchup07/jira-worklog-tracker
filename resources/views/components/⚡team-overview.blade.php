@@ -380,6 +380,132 @@ new class extends Component
 
     </div>
 
-    {{-- TASK 7 chart rows go here --}}
+    {{-- Row 5: Charts 2×2 --}}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
 
-</div>
+        <div class="card" style="padding:14px;">
+            <div style="font-size:12px; font-weight:600; color:var(--text); margin-bottom:8px;">Worklogs per Project</div>
+            <div id="chart-per-project" wire:ignore></div>
+        </div>
+
+        <div class="card" style="padding:14px;">
+            <div style="font-size:12px; font-weight:600; color:var(--text); margin-bottom:8px;">Worklogs per User</div>
+            <div id="chart-per-user" wire:ignore></div>
+        </div>
+
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+
+        <div class="card" style="padding:14px;">
+            <div style="font-size:12px; font-weight:600; color:var(--text); margin-bottom:8px;">Daily Worklog Trend</div>
+            <div id="chart-daily" wire:ignore></div>
+        </div>
+
+        <div class="card" style="padding:14px;">
+            <div style="font-size:12px; font-weight:600; color:var(--text); margin-bottom:8px;">Weekly Worklog Trend</div>
+            <div id="chart-weekly" wire:ignore></div>
+        </div>
+
+    </div>
+
+</div>{{-- /wire:poll wrapper --}}
+
+@script
+<script>
+    const _charts = {};
+
+    function _fmtSec(s) {
+        const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+        return h > 0 ? `${h}h${m > 0 ? ` ${m}m` : ''}` : `${m}m`;
+    }
+
+    function _dark() {
+        return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+
+    function _base() {
+        return {
+            chart:  { background: 'transparent', toolbar: { show: false } },
+            theme:  { mode: _dark() },
+            colors: ['#edd94c', '#60a5fa', '#34d399', '#f87171', '#a78bfa', '#fb923c'],
+            grid:   { borderColor: 'rgba(255,255,255,0.06)' },
+        };
+    }
+
+    function _applyCharts(data) {
+        // Donut — per project
+        const ppSeries = data.perProject.map(d => +(d.seconds / 3600).toFixed(2));
+        const ppLabels = data.perProject.map(d => d.label || 'Unknown');
+        if (!_charts.perProject) {
+            _charts.perProject = new ApexCharts(document.querySelector('#chart-per-project'), {
+                ..._base(),
+                chart:   { ..._base().chart, type: 'donut', height: 260 },
+                series:  ppSeries,
+                labels:  ppLabels,
+                legend:  { position: 'bottom', fontSize: '11px' },
+                tooltip: { y: { formatter: v => _fmtSec(v * 3600) } },
+            });
+            _charts.perProject.render();
+        } else {
+            _charts.perProject.updateOptions({ series: ppSeries, labels: ppLabels });
+        }
+
+        // Horizontal bar — per user
+        const puData = data.perUser.map(d => +(d.seconds / 3600).toFixed(1));
+        const puCats = data.perUser.map(d => d.label || 'Unknown');
+        if (!_charts.perUser) {
+            _charts.perUser = new ApexCharts(document.querySelector('#chart-per-user'), {
+                ..._base(),
+                chart:        { ..._base().chart, type: 'bar', height: 260 },
+                plotOptions:  { bar: { horizontal: true, borderRadius: 3 } },
+                series:       [{ name: 'Hours', data: puData }],
+                xaxis:        { categories: puCats },
+                tooltip:      { y: { formatter: v => `${v}h` } },
+            });
+            _charts.perUser.render();
+        } else {
+            _charts.perUser.updateOptions({ series: [{ name: 'Hours', data: puData }], xaxis: { categories: puCats } });
+        }
+
+        // Area — daily trend
+        const dtData = data.dailyTrend.map(d => +(d.seconds / 3600).toFixed(1));
+        const dtCats = data.dailyTrend.map(d => d.date);
+        if (!_charts.daily) {
+            _charts.daily = new ApexCharts(document.querySelector('#chart-daily'), {
+                ..._base(),
+                chart:   { ..._base().chart, type: 'area', height: 220 },
+                series:  [{ name: 'Hours', data: dtData }],
+                xaxis:   { categories: dtCats, labels: { rotate: -45, style: { fontSize: '10px' } } },
+                stroke:  { curve: 'smooth', width: 2 },
+                fill:    { type: 'gradient', gradient: { opacityFrom: 0.35, opacityTo: 0 } },
+                tooltip: { y: { formatter: v => `${v}h` } },
+            });
+            _charts.daily.render();
+        } else {
+            _charts.daily.updateOptions({ series: [{ name: 'Hours', data: dtData }], xaxis: { categories: dtCats } });
+        }
+
+        // Bar — weekly trend
+        const wtData = data.weeklyTrend.map(d => +(d.seconds / 3600).toFixed(1));
+        const wtCats = data.weeklyTrend.map(d => d.week);
+        if (!_charts.weekly) {
+            _charts.weekly = new ApexCharts(document.querySelector('#chart-weekly'), {
+                ..._base(),
+                chart:        { ..._base().chart, type: 'bar', height: 220 },
+                plotOptions:  { bar: { borderRadius: 3, columnWidth: '60%' } },
+                series:       [{ name: 'Hours', data: wtData }],
+                xaxis:        { categories: wtCats, labels: { style: { fontSize: '10px' } } },
+                tooltip:      { y: { formatter: v => `${v}h` } },
+            });
+            _charts.weekly.render();
+        } else {
+            _charts.weekly.updateOptions({ series: [{ name: 'Hours', data: wtData }], xaxis: { categories: wtCats } });
+        }
+    }
+
+    window.addEventListener('chartsUpdated', (e) => {
+        _applyCharts(e.detail.data);
+    });
+</script>
+@endscript

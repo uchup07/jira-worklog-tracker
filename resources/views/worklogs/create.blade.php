@@ -31,8 +31,8 @@
                         @enderror
                     </div>
 
-                    {{-- Time + Date --}}
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    {{-- Time Spent + Date + Time --}}
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
                         <x-input label="Time Spent"
                                  name="time_spent"
                                  placeholder="1h 30m, 2h, 45m"
@@ -44,6 +44,12 @@
                                  type="date"
                                  :value="old('started_at', now()->toDateString())"
                                  :error="$errors->first('started_at')" />
+
+                        <x-input label="Time"
+                                 name="started_at_time"
+                                 type="time"
+                                 :value="old('started_at_time', now()->format('H:i'))"
+                                 :error="$errors->first('started_at_time')" />
                     </div>
 
                     {{-- Comment --}}

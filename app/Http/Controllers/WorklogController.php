@@ -39,6 +39,7 @@ class WorklogController extends Controller
             'issue_key' => 'required|string',
             'time_spent' => 'required|string',
             'started_at' => 'required|date',
+            'started_at_time' => 'nullable|string',
             'comment' => 'nullable|string|max:2000',
             'return_to_issue' => 'nullable|boolean',
         ]);
@@ -49,7 +50,11 @@ class WorklogController extends Controller
             return back()->withErrors(['time_spent' => 'Invalid time format. Use "1h 30m", "2h", or "30m".'])->withInput();
         }
 
-        $started = Carbon::parse($validated['started_at'])->startOfDay()->utc();
+        $timeStr = filled($validated['started_at_time'] ?? null)
+            ? $validated['started_at_time']
+            : '00:00';
+
+        $started = Carbon::parse($validated['started_at'].' '.$timeStr)->utc();
 
         try {
             JiraApiService::fromSettings()->createWorklog(

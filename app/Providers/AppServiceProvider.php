@@ -36,19 +36,23 @@ class AppServiceProvider extends ServiceProvider
             $view->with('lastSynced', $lastSynced ? Carbon::parse($lastSynced)->diffForHumans() : null);
         });
 
-        // Offset sidebar below NativePHP 38px drag strip; fix nav items height constraint
+        // Offset sidebar below NativePHP 38px drag strip; explicit height so background fills viewport
         TallStackUi::customize()
             ->sideBar()
-            ->block('desktop.wrapper.first.base', 'fixed left-0 top-[38px] z-50')
-            ->block('desktop.wrapper.second', 'dark:bg-dark-700 dark:border-dark-600 flex h-[calc(100vh-38px)] flex-col border-r border-gray-200 bg-white pb-4 transition-[width] duration-300')
+            //->block('desktop.wrapper.first.base', 'fixed left-0 top-[38px] z-50 flex flex-col')
+            ->block('desktop.wrapper.first.base')->append('mt-[38px]')
+            ->block('desktop.wrapper.second', 'dark:bg-dark-700 dark:border-dark-600 flex grow flex-col border-r border-gray-200 bg-white pb-4 transition-[width] duration-300')
             ->block('desktop.wrapper.third', 'flex flex-col')
             ->block('desktop.wrapper.fourth', 'flex flex-1 flex-col');
 
-        // Make content area fill viewport; reduce excessive padding; enable content scroll
+        // Height chain: wrapper.first fills space below 38px titlebar; wrapper.second is flex column
+        // so the header takes natural height and main expands to fill the rest with scroll
         TallStackUi::customize()
             ->layout()
-            ->block('wrapper.first', 'min-h-screen')
-            ->block('main', 'overflow-y-auto px-5 py-4 max-w-full');
+            ->block('wrapper.first', 'flex-1 h-[calc(100vh-38px)]')
+            ->block('wrapper.second.expanded', 'md:pl-72 transition-[padding] duration-300 h-full flex flex-col')
+            ->block('wrapper.second.collapsed', 'md:pl-22 transition-[padding] duration-300 h-full flex flex-col')
+            ->block('main', 'flex-1 min-h-0 overflow-y-auto px-5 py-4 max-w-full');
     }
 
     protected function resolveAppTheme(): string

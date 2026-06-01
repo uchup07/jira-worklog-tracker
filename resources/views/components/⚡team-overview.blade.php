@@ -260,6 +260,126 @@ new class extends Component
 
     </div>
 
-    {{-- TASKS 6–7 content goes here --}}
+    {{-- Row 3: Top Contributors + Worklogs per Status --}}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+
+        <div class="card" style="overflow:hidden;">
+            <div style="padding:11px 14px; border-bottom:1px solid var(--border);">
+                <span style="font-size:12px; font-weight:600; color:var(--text);">Top Contributors</span>
+            </div>
+            @if($topContributors->isEmpty())
+                <div style="padding:20px; text-align:center; font-size:12px; color:var(--text-muted);">No worklogs in this period.</div>
+            @else
+                @php $maxC = $topContributors->max('total_seconds') ?: 1; @endphp
+                <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px;">
+                    @foreach($topContributors as $c)
+                        @php
+                            $cH = floor($c->total_seconds/3600); $cM = floor(($c->total_seconds%3600)/60);
+                            $cT = $cH > 0 ? "{$cH}h".($cM > 0 ? " {$cM}m" : '') : "{$cM}m";
+                            $cPct = round(($c->total_seconds / $maxC) * 100);
+                        @endphp
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                                <span style="font-size:12px; color:var(--text); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $c->author_display_name }}</span>
+                                <span class="display" style="font-size:13px; font-weight:700; font-style:italic;">{{ $cT }}</span>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" style="width:{{ $cPct }}%"></div></div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+        <div class="card" style="overflow:hidden;">
+            <div style="padding:11px 14px; border-bottom:1px solid var(--border);">
+                <span style="font-size:12px; font-weight:600; color:var(--text);">Worklogs per Status</span>
+            </div>
+            @if($worklogsPerStatus->isEmpty())
+                <div style="padding:20px; text-align:center; font-size:12px; color:var(--text-muted);">No worklogs in this period.</div>
+            @else
+                @php $maxSt = $worklogsPerStatus->max('total_seconds') ?: 1; @endphp
+                <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px;">
+                    @foreach($worklogsPerStatus as $s)
+                        @php
+                            $sH = floor($s->total_seconds/3600); $sM = floor(($s->total_seconds%3600)/60);
+                            $sT = $sH > 0 ? "{$sH}h".($sM > 0 ? " {$sM}m" : '') : "{$sM}m";
+                            $sPct = round(($s->total_seconds / $maxSt) * 100);
+                        @endphp
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                                <span class="badge-status">{{ $s->status }}</span>
+                                <span class="display" style="font-size:13px; font-weight:700; font-style:italic;">{{ $sT }}</span>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" style="width:{{ $sPct }}%"></div></div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+    </div>
+
+    {{-- Row 4: Projects by Workload + Worklogs per Project table --}}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+
+        <div class="card" style="overflow:hidden;">
+            <div style="padding:11px 14px; border-bottom:1px solid var(--border);">
+                <span style="font-size:12px; font-weight:600; color:var(--text);">Projects by Workload</span>
+            </div>
+            @if($worklogsPerProject->isEmpty())
+                <div style="padding:20px; text-align:center; font-size:12px; color:var(--text-muted);">No worklogs in this period.</div>
+            @else
+                @php $maxPj = $worklogsPerProject->max('total_seconds') ?: 1; @endphp
+                <div style="padding:12px 14px; display:flex; flex-direction:column; gap:10px;">
+                    @foreach($worklogsPerProject as $pj)
+                        @php
+                            $pjH = floor($pj->total_seconds/3600); $pjM = floor(($pj->total_seconds%3600)/60);
+                            $pjT = $pjH > 0 ? "{$pjH}h".($pjM > 0 ? " {$pjM}m" : '') : "{$pjM}m";
+                            $pjPct = round(($pj->total_seconds / $maxPj) * 100);
+                        @endphp
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;">
+                                <span class="badge-key">{{ $pj->project_key }}</span>
+                                <span class="display" style="font-size:13px; font-weight:700; font-style:italic;">{{ $pjT }}</span>
+                            </div>
+                            <div class="progress-track"><div class="progress-fill" style="width:{{ $pjPct }}%"></div></div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+        <div class="card" style="overflow:hidden;">
+            <div style="padding:11px 14px; border-bottom:1px solid var(--border);">
+                <span style="font-size:12px; font-weight:600; color:var(--text);">Worklogs per Project</span>
+            </div>
+            @if($worklogsPerProject->isEmpty())
+                <div style="padding:20px; text-align:center; font-size:12px; color:var(--text-muted);">No worklogs in this period.</div>
+            @else
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="font-size:10.5px; color:var(--text-muted); padding:8px 14px; text-align:left; font-weight:500;">Project</th>
+                            <th style="font-size:10.5px; color:var(--text-muted); padding:8px 14px; text-align:right; font-weight:500;">Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($worklogsPerProject as $pj)
+                            @php $rH = floor($pj->total_seconds/3600); $rM = floor(($pj->total_seconds%3600)/60); @endphp
+                            <tr>
+                                <td><span class="badge-key">{{ $pj->project_key }}</span></td>
+                                <td style="text-align:right;" class="display">
+                                    {{ $rH }}h@if($rM > 0) {{ $rM }}m@endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+
+    </div>
+
+    {{-- TASK 7 chart rows go here --}}
 
 </div>

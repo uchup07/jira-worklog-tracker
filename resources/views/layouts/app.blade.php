@@ -54,7 +54,7 @@
 
             <x-side-bar.item text="Dashboard"    route="{{ route('dashboard') }}"       icon="home" />
             <x-side-bar.item text="Team Overview" route="{{ route('team-overview') }}" icon="chart-bar" />
-            <x-side-bar.item text="Utilization"   route="{{ route('utilization.index') }}" icon="chart-pie" />
+            <x-side-bar.item text="Utilization" route="{{ route('utilization.index') }}" icon="chart-pie" />
             <x-side-bar.item text="My Issues"  route="{{ route('issues.index') }}"    icon="clipboard-document-list" />
             <x-side-bar.item text="Worklogs">
                 <x-side-bar.item text="Monitoring" route="{{ route('worklogs.monitoring') }}" icon="table-cells" />

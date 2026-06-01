@@ -228,7 +228,9 @@ Validates and saves all seven keys via `Settings::set()`. Returns redirect back 
 
 ### Dynamic Config at Send Time
 
-Before dispatching `WorklogReminderMail`:
+Mail is sent synchronously via `Mail::to($email)->send(...)` (not queued — NativePHP desktop app has no persistent queue worker).
+
+Before sending `WorklogReminderMail`:
 
 ```php
 Config::set('mail.mailers.smtp.host',       Settings::get('smtp_host'));

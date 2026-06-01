@@ -119,9 +119,9 @@ new class extends Component
     private function dateRange(): array
     {
         return match ($this->period) {
-            'week' => [Carbon::now()->startOfWeek(), Carbon::now()],
+            'week' => [Carbon::now()->subDays(7), Carbon::now()],
             '3months' => [Carbon::now()->subMonths(3), Carbon::now()],
-            default => [Carbon::now()->startOfMonth(), Carbon::now()],
+            default => [Carbon::now()->subDays(30), Carbon::now()],
         };
     }
 

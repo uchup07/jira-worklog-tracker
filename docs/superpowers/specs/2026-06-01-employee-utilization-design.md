@@ -49,8 +49,11 @@ Display is uncapped (can exceed 100% if someone logs overtime).
 | 70% – 89.9% | Yellow (`var(--yellow)`) |
 | < 70% | Red (`var(--red)`) |
 
+### Edge case: zero working days
+If the selected month contains no weekdays (e.g. a hypothetical all-weekend month), `$targetSeconds` is 0. In this case all rows show `—` in the Utilization column rather than dividing by zero.
+
 ### Sort order
-Descending by utilization % (highest performers first).
+Descending by utilization % (highest performers first). Rows with `—` utilization sort to the bottom.
 
 ---
 

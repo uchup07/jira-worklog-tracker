@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\JiraBackgroundSyncService;
 use App\Services\JiraApiService;
+use App\Services\JiraBackgroundSyncService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Native\Desktop\Facades\Settings;
 
@@ -132,5 +133,24 @@ class SetupController extends Controller
         }
 
         return redirect()->route('setup');
+    }
+
+    public function updateSmtp(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'smtp_host' => 'required|string',
+            'smtp_port' => 'required|integer|min:1|max:65535',
+            'smtp_username' => 'nullable|string',
+            'smtp_password' => 'nullable|string',
+            'smtp_from_address' => 'required|email',
+            'smtp_from_name' => 'required|string',
+            'smtp_encryption' => 'nullable|in:tls,ssl',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            Settings::set($key, $value);
+        }
+
+        return redirect()->back()->with('success', 'SMTP settings saved.');
     }
 }

@@ -92,6 +92,62 @@
         <p style="text-align:center; font-size:11px; color:var(--text-subtle); margin-top:14px; line-height:1.6;">
             Credentials are stored locally on this device only.
         </p>
+
+        {{-- SMTP / Email Settings --}}
+        <div style="margin-top:24px;">
+            <h2 style="font-size:14px; font-weight:700; color:var(--text); margin-bottom:12px; letter-spacing:-0.02em;">Email / SMTP</h2>
+            <x-card style="padding:22px;">
+                <form method="POST" action="{{ route('setup.smtp') }}">
+                    @csrf
+                    <div style="display:flex; flex-direction:column; gap:14px;">
+                        <x-input label="SMTP Host"
+                                 name="smtp_host"
+                                 placeholder="smtp.gmail.com"
+                                 :value="old('smtp_host', \Native\Desktop\Facades\Settings::get('smtp_host', ''))"
+                                 :error="$errors->first('smtp_host')" />
+                        <x-input label="SMTP Port"
+                                 name="smtp_port"
+                                 placeholder="587"
+                                 :value="old('smtp_port', \Native\Desktop\Facades\Settings::get('smtp_port', '587'))"
+                                 :error="$errors->first('smtp_port')" />
+                        <x-input label="SMTP Username"
+                                 name="smtp_username"
+                                 placeholder="you@example.com"
+                                 :value="old('smtp_username', \Native\Desktop\Facades\Settings::get('smtp_username', ''))"
+                                 :error="$errors->first('smtp_username')" />
+                        <x-input label="SMTP Password"
+                                 name="smtp_password"
+                                 type="password"
+                                 placeholder="App password or SMTP password"
+                                 :value="old('smtp_password', \Native\Desktop\Facades\Settings::get('smtp_password', ''))"
+                                 :error="$errors->first('smtp_password')" />
+                        <x-input label="From Address"
+                                 name="smtp_from_address"
+                                 type="email"
+                                 placeholder="you@example.com"
+                                 :value="old('smtp_from_address', \Native\Desktop\Facades\Settings::get('smtp_from_address', ''))"
+                                 :error="$errors->first('smtp_from_address')" />
+                        <x-input label="From Name"
+                                 name="smtp_from_name"
+                                 placeholder="Worklog Tracker"
+                                 :value="old('smtp_from_name', \Native\Desktop\Facades\Settings::get('smtp_from_name', 'Worklog Tracker'))"
+                                 :error="$errors->first('smtp_from_name')" />
+                        <div>
+                            <label style="font-size:12px; font-weight:500; color:var(--text-muted); display:block; margin-bottom:6px;">Encryption</label>
+                            <select name="smtp_encryption"
+                                    style="background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:7px 10px; font-size:13px; color:var(--text); width:100%; outline:none;">
+                                <option value="">None</option>
+                                <option value="tls" @selected(\Native\Desktop\Facades\Settings::get('smtp_encryption') === 'tls')>TLS</option>
+                                <option value="ssl" @selected(\Native\Desktop\Facades\Settings::get('smtp_encryption') === 'ssl')>SSL</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top:20px;">
+                        <x-button type="submit" color="primary" full>Save SMTP Settings</x-button>
+                    </div>
+                </form>
+            </x-card>
+        </div>
     </div>
 
     @livewireScripts

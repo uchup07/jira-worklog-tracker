@@ -30,13 +30,14 @@ Weekends only are excluded — no public holiday handling.
 ### Actual hours
 Sum `time_spent_seconds` from `jira_worklogs` where:
 - `started_at` falls within the selected month (first day 00:00:00 → last day 23:59:59)
-- `issue_key` is scoped to the selected project via the existing `scopeForProject` query scope
+- **No project scope** — counts worklogs across all projects for each user
 
 Grouped by `author_account_id`.
 
 ### Users shown
-All active users from `jira_project_users` for the selected project (`active = true`).  
-Users with zero worklogs in the month appear with 0h actual, full target, 0% utilization (shown in red).
+Active users from `jira_project_users` scoped to the selected project (`active = true`).  
+Worklogs are summed across **all projects** — the selected project only determines which people appear in the roster.  
+Users with zero worklogs in the month (across any project) appear with 0h actual, full target, 0% utilization (shown in red).
 
 ### Utilization %
 `round(actualSeconds / targetSeconds * 100, 1)`  

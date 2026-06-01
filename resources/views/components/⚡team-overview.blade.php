@@ -170,6 +170,93 @@ new class extends Component
 };
 ?>
 
-<div wire:poll.300s="pollRefresh" style="padding:16px 18px;">
-    <p style="color:var(--text);">Team Overview — scaffold</p>
+<div wire:poll.300s="pollRefresh"
+     style="padding:16px 18px; display:flex; flex-direction:column; gap:12px;
+            overflow-y:auto; height:100%;">
+
+    {{-- Filter bar --}}
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+
+            @if(!empty($availableProjects))
+                <select wire:model.live="selectedProject"
+                        style="font-size:12px; padding:5px 10px; border-radius:6px;
+                               border:1px solid var(--border); background:var(--surface-2);
+                               color:var(--text); cursor:pointer;">
+                    @foreach($availableProjects as $p)
+                        <option value="{{ $p['value'] }}">{{ $p['label'] }}</option>
+                    @endforeach
+                </select>
+            @else
+                <span style="font-size:12px; color:var(--text-muted);">No project — <a href="{{ route('setup.project') }}" style="color:var(--accent);">configure one</a></span>
+            @endif
+
+            @foreach(['week' => 'This Week', 'month' => 'This Month', '3months' => '3 Months'] as $val => $label)
+                <button wire:click="$set('period', '{{ $val }}')"
+                        style="font-size:11.5px; padding:4px 10px; border-radius:5px; cursor:pointer;
+                               border:1px solid {{ $period === $val ? 'var(--accent)' : 'var(--border)' }};
+                               background:{{ $period === $val ? 'var(--accent-dim)' : 'transparent' }};
+                               color:{{ $period === $val ? 'var(--accent)' : 'var(--text-muted)' }};">
+                    {{ $label }}
+                </button>
+            @endforeach
+
+        </div>
+        @if($lastRefreshed)
+            <span style="font-size:11px; color:var(--text-subtle);">refreshed {{ $lastRefreshed }}</span>
+        @endif
+    </div>
+
+    {{-- KPI stat cards --}}
+    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px;">
+
+        {{-- Total Work Hours --}}
+        @php $wH = floor($totalWorkSeconds/3600); $wM = floor(($totalWorkSeconds%3600)/60); @endphp
+        <div class="card" style="padding:14px 16px; position:relative; overflow:hidden;">
+            <div style="font-size:10px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Work Hours</div>
+            <div class="stat-num" style="font-size:32px; color:var(--accent);">
+                {{ $wH }}<span style="font-size:15px; opacity:0.6; margin-left:1px;">h</span>@if($wM > 0){{ $wM }}<span style="font-size:12px; opacity:0.6; margin-left:1px;">m</span>@endif
+            </div>
+        </div>
+
+        {{-- Worklogs Today --}}
+        <div class="card" style="padding:14px 16px;">
+            <div style="font-size:10px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Logs Today</div>
+            <div class="stat-num" style="font-size:32px;">{{ $totalWorklogsToday }}</div>
+        </div>
+
+        {{-- Worklogs This Month --}}
+        <div class="card" style="padding:14px 16px;">
+            <div style="font-size:10px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Logs This Month</div>
+            <div class="stat-num" style="font-size:32px;">{{ $totalWorklogsMonth }}</div>
+        </div>
+
+        {{-- Active Users --}}
+        <div class="card" style="padding:14px 16px;">
+            <div style="font-size:10px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Active Users</div>
+            <div class="stat-num" style="font-size:32px;">{{ $activeUsers }}</div>
+        </div>
+
+        {{-- Users Not Logging --}}
+        <div class="card" style="padding:14px 16px;">
+            <div style="font-size:10px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px;">Not Logging</div>
+            <div class="stat-num" style="font-size:32px; color:{{ $usersNotLogging->isNotEmpty() ? 'var(--red, #f87171)' : 'var(--text)' }};">
+                {{ $usersNotLogging->count() }}
+            </div>
+            @if($usersNotLogging->isNotEmpty())
+                <div style="margin-top:5px; display:flex; flex-direction:column; gap:2px;">
+                    @foreach($usersNotLogging->take(3) as $u)
+                        <div style="font-size:10.5px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $u->display_name }}</div>
+                    @endforeach
+                    @if($usersNotLogging->count() > 3)
+                        <div style="font-size:10px; color:var(--text-subtle);">+{{ $usersNotLogging->count() - 3 }} more</div>
+                    @endif
+                </div>
+            @endif
+        </div>
+
+    </div>
+
+    {{-- TASKS 6–7 content goes here --}}
+
 </div>

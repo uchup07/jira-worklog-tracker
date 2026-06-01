@@ -148,9 +148,9 @@ new class extends Component
                                 default  => 'var(--red)',
                             };
                             $dimColor = match($row['color_band']) {
-                                'green'  => 'oklch(0.750 0.170 142 / 0.10)',
+                                'green'  => 'var(--green-dim)',
                                 'yellow' => 'var(--accent-dim)',
-                                default  => 'oklch(0.650 0.220 25 / 0.10)',
+                                default  => 'var(--red-dim)',
                             };
                             $barWidth = $row['utilization_pct'] !== null
                                 ? min((float) $row['utilization_pct'], 100)
@@ -158,9 +158,9 @@ new class extends Component
 
                             $h = floor($row['actual_seconds'] / 3600);
                             $m = floor(($row['actual_seconds'] % 3600) / 60);
-                            $actualFormatted = $h > 0
-                                ? "{$h}h" . ($m > 0 ? " {$m}m" : '')
-                                : "{$m}m";
+                            $actualFormatted = $row['actual_seconds'] === 0
+                                ? '—'
+                                : ($h > 0 ? "{$h}h" . ($m > 0 ? " {$m}m" : '') : "{$m}m");
                         @endphp
                         <tr>
                             <td style="font-size:13px; font-weight:500; color:var(--text);">

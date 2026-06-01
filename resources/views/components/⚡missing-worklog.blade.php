@@ -48,13 +48,18 @@ new class extends Component
 
         $this->sendingTo = $accountId;
 
-        Config::set('mail.mailers.smtp.host', Settings::get('smtp_host'));
-        Config::set('mail.mailers.smtp.port', Settings::get('smtp_port'));
-        Config::set('mail.mailers.smtp.username', Settings::get('smtp_username'));
-        Config::set('mail.mailers.smtp.password', Settings::get('smtp_password'));
-        Config::set('mail.mailers.smtp.encryption', Settings::get('smtp_encryption'));
-        Config::set('mail.from.address', Settings::get('smtp_from_address'));
-        Config::set('mail.from.name', Settings::get('smtp_from_name'));
+        $encryption = Settings::get('smtp_encryption') ?: null;
+
+        Config::set('mail.default', 'smtp');
+        Config::set('mail.mailers.smtp.transport', 'smtp');
+        Config::set('mail.mailers.smtp.host', Settings::get('smtp_host', 'localhost'));
+        Config::set('mail.mailers.smtp.port', (int) Settings::get('smtp_port', 1025));
+        Config::set('mail.mailers.smtp.username', Settings::get('smtp_username') ?: null);
+        Config::set('mail.mailers.smtp.password', Settings::get('smtp_password') ?: null);
+        Config::set('mail.mailers.smtp.encryption', $encryption);
+        Config::set('mail.from.address', Settings::get('smtp_from_address', 'hello@example.com'));
+        Config::set('mail.from.name', Settings::get('smtp_from_name', 'Worklog Tracker'));
+        Mail::purge('smtp');
 
         try {
             Mail::to($user->email)->send(

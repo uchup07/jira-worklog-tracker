@@ -50,49 +50,7 @@
                     ← Back to credentials
                 </a>
             @else
-                <form method="POST" action="{{ route('setup.project.store') }}"
-                      x-data="{ submitting: false, selected: @js($projects[0]['key'] ?? ''), selectedName: @js($projects[0]['name'] ?? '') }"
-                      @submit="submitting = true">
-                    @csrf
-
-                    <input type="hidden" name="project_name" x-model="selectedName">
-
-                    <div style="display:flex; flex-direction:column; gap:5px; max-height:300px; overflow-y:auto; margin-bottom:16px;">
-                        @foreach($projects as $project)
-                            <label x-bind:style="selected === '{{ $project['key'] }}' ? 'border-color:oklch(0.857 0.168 87.5 / 0.35); background:var(--accent-dim);' : ''"
-                                   style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius); background:var(--surface-2); border:1px solid var(--border); cursor:pointer; transition:all 100ms;">
-                                <input type="radio" name="project_key" value="{{ $project['key'] }}"
-                                       {{ $loop->first ? 'checked' : '' }}
-                                       @change="selected = @js($project['key']); selectedName = @js($project['name'])"
-                                       style="accent-color:var(--accent); width:13px; height:13px; flex-shrink:0;">
-                                <span class="mono" style="font-size:11px; font-weight:500; color:var(--accent); background:var(--accent-dim); padding:2px 6px; border-radius:3px; flex-shrink:0;">
-                                    {{ $project['key'] }}
-                                </span>
-                                <span style="font-size:13px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                    {{ $project['name'] }}
-                                </span>
-                            </label>
-                        @endforeach
-                    </div>
-
-                    @error('project_key')
-                        <p style="font-size:11.5px; color:var(--red); margin-bottom:12px;">{{ $message }}</p>
-                    @enderror
-                    @error('project_name')
-                        <p style="font-size:11.5px; color:var(--red); margin-bottom:12px;">{{ $message }}</p>
-                    @enderror
-
-                    <button type="submit" class="btn btn-primary"
-                            :disabled="submitting" :class="{ 'opacity-50': submitting }"
-                            style="width:100%; justify-content:center; padding:8px 12px;">
-                        <svg width="13" height="13" fill="none" stroke="currentColor"
-                             viewBox="0 0 24 24" stroke-width="2.2" x-show="!submitting">
-                            <path stroke-linecap="round" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        <span x-text="submitting ? 'Starting sync…' : 'Start Tracking'"></span>
-                    </button>
-
-                </form>
+                <livewire:setup-project-selector :projects="$projects" />
 
                 <div style="text-align:center; margin-top:12px;">
                     <a href="{{ route('setup') }}"
@@ -107,5 +65,6 @@
 
     </div>
 
+    @livewireScripts
 </body>
 </html>

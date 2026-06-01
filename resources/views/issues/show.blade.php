@@ -58,13 +58,13 @@
                                 <div style="min-width:0;">
                                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:5px;">
                                         <span style="font-size:12.5px; color:var(--text); font-weight:600;">{{ $worklog->author_display_name }}</span>
-                                        <span style="font-size:11.5px; color:var(--text-subtle);">{{ $worklog->started_at?->format('M j, Y') ?? 'No date' }}</span>
+                                        <span style="font-size:11.5px; color:var(--text-subtle);">{{ $worklog->started_at?->format('M j, Y H:i') ?? 'No date' }}</span>
                                     </div>
-                                    <div style="font-size:12px; color:var(--text-muted); line-height:1.45; white-space:pre-wrap; word-break:break-word;">
+                                    <div class="text-sm font-mono">
                                         {{ $worklog->comment ?: 'No comment' }}
                                     </div>
                                 </div>
-                                <div class="stat-num" style="font-size:18px; flex-shrink:0;">{{ $t }}</div>
+                                <div class="stat-num"><x-badge :text="$t" color="secondary" class="font-mono" light /></div>
                             </div>
                         @endforeach
                     </div>
@@ -142,7 +142,7 @@
                     <p style="font-size:11px; font-weight:600; color:var(--text-subtle); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px;">Time formats</p>
                     <div style="display:flex; gap:8px; flex-wrap:wrap;">
                         @foreach(['1h 30m', '2h', '45m', '90m'] as $example)
-                            <code class="mono" style="font-size:11.5px; color:var(--text-muted); background:var(--surface-2); padding:2px 6px; border-radius:4px; border:1px solid var(--border);">{{ $example }}</code>
+                            <x-badge :text="$example" color="secondary" class="font-mono" light />
                         @endforeach
                     </div>
                 </div>

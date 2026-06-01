@@ -157,7 +157,7 @@ new class extends Component
                         <th>Sprint</th>
                         <th>Epic</th>
                         <th>Author</th>
-                        <th>Date</th>
+                        <th>Date + started_at_time</th>
                         <th>Time</th>
                         <th>Comment</th>
                     </tr>
@@ -195,7 +195,10 @@ new class extends Component
                                 @if($me)<x-badge text="you" color="yellow" style="margin-left:4px;" />@endif
                             </td>
                             <td>
-                                <span class="mono" style="font-size:12px; color:var(--text-muted);">{{ $wl->started_at?->format('M j, Y') }}</span>
+                                <div style="display:flex; flex-direction:column; gap:2px;">
+                                    <span class="mono" style="font-size:12px; color:var(--text-muted);">{{ $wl->started_at?->format('M j, Y') }}</span>
+                                    <span class="mono" style="font-size:11px; color:var(--text-subtle);">{{ $wl->started_at?->format('H:i') ?: '—' }}</span>
+                                </div>
                             </td>
                             <td>
                                 <span style="font-size:14px; font-weight:700; letter-spacing:-0.03em; color:var(--text);">{{ $t }}</span>

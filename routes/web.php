@@ -7,7 +7,6 @@ use App\Http\Controllers\SyncController;
 use App\Http\Controllers\WorklogController;
 use App\Http\Middleware\EnsureJiraConnected;
 use Illuminate\Support\Facades\Route;
-use Livewire\Volt\Volt;
 
 Route::get('/', fn () => redirect()->route('dashboard'))->name('home');
 
@@ -20,7 +19,7 @@ Route::post('/setup/disconnect', [SetupController::class, 'disconnect'])->name('
 
 Route::middleware(EnsureJiraConnected::class)->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Volt::route('/team-overview', 'team-overview')->name('team-overview');
+    Route::get('/team-overview', fn () => view('team-overview.index'))->name('team-overview');
 
     Route::get('/issues', [IssueController::class, 'index'])->name('issues.index');
     Route::get('/issues/{issue}', [IssueController::class, 'show'])->name('issues.show');

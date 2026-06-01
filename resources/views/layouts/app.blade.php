@@ -52,7 +52,8 @@
                 </div>
             </x-slot:brand-collapsed>
 
-            <x-side-bar.item text="Dashboard"  route="{{ route('dashboard') }}"       icon="home" />
+            <x-side-bar.item text="Dashboard"    route="{{ route('dashboard') }}"       icon="home" />
+            <x-side-bar.item text="Team Overview" route="{{ route('team-overview') }}" icon="chart-bar" />
             <x-side-bar.item text="My Issues"  route="{{ route('issues.index') }}"    icon="clipboard-document-list" />
             <x-side-bar.item text="Worklogs"   route="{{ route('worklogs.index') }}"  icon="clock" />
             <x-side-bar.separator />
@@ -69,16 +70,12 @@
         <x-layout.header>
 
             <x-slot:left>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <button type="button" class="btn btn-ghost btn-sm titlebar-no-drag"
-                            onclick="window.history.length > 1 ? window.history.back() : window.location.href='{{ route('dashboard') }}'">
-                        <svg width="11" height="11" fill="none" stroke="currentColor"
-                             viewBox="0 0 24 24" stroke-width="2.2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/>
-                        </svg>
-                        Back
-                    </button>
-                    <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                <div class="flex items-center space-x-4">
+                    @if(!request()->routeIs('dashboard'))
+                        <x-button icon="chevron-left" position="left"  outline onclick="window.history.length > 1 ? window.history.back() : window.location.href='{{ route('dashboard') }}'">Back</x-button>
+                    @endif
+
+                    <div class="flex items-center space-x-4">
                         <span class="mono"
                               style="font-size:11px; font-weight:500; color:var(--accent);
                                      background:var(--accent-dim); padding:2px 8px; border-radius:4px;
@@ -102,16 +99,8 @@
 
             <x-slot:right>
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <x-theme-switch simple only-icons sm class="app-theme-switch titlebar-no-drag" />
-
-                    <a href="{{ route('setup.project') }}" class="btn btn-ghost btn-sm">
-                        <svg width="11" height="11" fill="none" stroke="currentColor"
-                             viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M3 7.5h7l2 2h9v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/>
-                        </svg>
-                        Choose Project
-                    </a>
+                    <x-theme-switch simple class="app-theme-switch" />
+                    <x-button.circle icon="folder"  href="{{ route('setup.project') }}" flat />
 
                     <form method="POST" action="{{ route('sync') }}" x-data="{ busy: false }" @submit="busy = true">
                         @csrf
@@ -152,7 +141,10 @@
         </div>
     @endif
 
-    @yield('content')
+
+    {{ $slot }}
+
+
 
 </x-layout>
 
